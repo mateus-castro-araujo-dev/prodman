@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="menu-grid">
+    <a href="{% url 'insumos_list' %}" class="btn-acessivel">
+        <img src="../static/icons/insumos.png" alt="">
+        <span class="btn-text">Insumos</span>
+    </a>
+
+    <a href="{% url 'compras_list' %}" class="btn-acessivel">
+        <img src="../static/icons/compras.png" alt="">
+        <span class="btn-text">Compras</span>
+    </a>
+
+    <a href="{% url 'receitas_list' %}" class="btn-acessivel">
+        <img src="../static/icons/receitas.png" alt="">
+        <span class="btn-text">Receitas</span>
+    </a>
+
+    <a href="{% url 'producao_list' %}" class="btn-acessivel">
+        <img src="../static/icons/producao.png" alt="">
+        <span class="btn-text">Produção</span>
+    </a>
+
+    <a href="{% url 'venda_view' %}" class="btn-acessivel">
+        <img src="../static/icons/venda.png" alt="">
+        <span class="btn-text">Venda</span>
+    </a>
+
+    <a href="{% url 'relatorios' %}" class="btn-acessivel">
+        <img src="../static/icons/relatorio.png" alt="">
+        <span class="btn-text">Relatórios</span>
+    </a>
+</div>
+{% endblock %}

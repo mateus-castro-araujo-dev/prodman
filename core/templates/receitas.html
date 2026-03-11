@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="text-center">
+    <h2 class="page-title">📖 Livro de Receitas</h2>
+</div>
+
+<div class="scroll-container">
+    <div class="row g-4">
+        {% for receita in receitas %}
+        <div class="col-xl-6">
+            <div class="receita-card">
+                <div class="row g-0 h-100">
+                    <div class="col-md-4 receita-img-box">
+                        {% if receita.imagem %}
+                            <img src="{{ receita.imagem.url }}" alt="{{ receita.nome_receita }}">
+                        {% else %}
+                            <div class="text-center p-3">
+                                <span class="fw-bold text-muted">SEM FOTO</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="card-body p-4">
+                            <div class="receita-nome">{{ receita.nome_receita }}</div>
+                            
+                            <h6 class="fw-bold text-dark mb-3">🛒 Ingredientes Necessários:</h6>
+                            <div class="ingrediente-lista">
+                                {% for item in receita.ingredientes.all %}
+                                <li class="ingrediente-item">
+                                    <span class="check-icon">●</span>
+                                    <div>
+                                        <span class="qtd-tecnica">{{ item.qtd }}{{ item.insumo.und_medida }}</span> 
+                                        <span>de {{ item.insumo.nome_insumo }}</span>
+                                        <span class="medida-caseira">({{ item.medida_caseira }})</span>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="alert alert-warning border-dark fw-bold py-5">
+                <h3>NENHUMA RECEITA ENCONTRADA.</h3>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 m-4">
+    <a href="{% url 'home' %}" class="btn btn-dark btn-lg border-warning p-3 px-4 fw-bold shadow">
+        ⬅ VOLTAR AO INÍCIO
+    </a>
+</div>
+{% endblock %}

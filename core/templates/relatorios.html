@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="text-center">
+    <h2 class="page-title">📊 Relatórios de Gestão</h2>
+</div>
+
+<div class="filtro-container">
+    <form method="GET" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">📅 Início</label>
+            <input type="date" name="data_inicio" class="form-control form-control-lg" required value="{{ request.GET.data_inicio }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">📅 Fim</label>
+            <input type="date" name="data_fim" class="form-control form-control-lg" required value="{{ request.GET.data_fim }}">
+        </div>
+        <div class="col-md-4 d-grid">
+            <label class="form-label d-none d-md-block">&nbsp;</label>
+            <button type="submit" class="btn btn-buscar">🔍 VER RELATÓRIO</button>
+        </div>
+    </form>
+</div>
+
+<ul class="nav nav-tabs" id="relatorioTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="prod-tab" data-bs-toggle="tab" data-bs-target="#prod" type="button">🏭 Produções</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="vendas-tab" data-bs-toggle="tab" data-bs-target="#vendas" type="button">💰 Vendas</button>
+    </li>
+</ul>
+
+<div class="tab-content scroll-relatorio mt-0" id="relatorioTabContent">
+    <div class="tab-pane fade show active p-3 bg-white border border-dark border-top-0 rounded-bottom" id="prod">
+        {% if producoes %}
+        <table class="table table-acessivel table-hover">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Receita</th>
+                    <th>Qtd</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in producoes %}
+                <tr>
+                    <td>{{ p.data_inicio|date:"d/m/Y" }}</td>
+                    <td class="text-primary">{{ p.receita.nome_receita }}</td>
+                    <td>{{ p.qtd_produzida|default:"0" }} un.</td>
+                    <td>
+                        {% if p.qtd_produzida %}
+                            <span class="status-badge bg-success text-white">Pronto</span>
+                        {% else %}
+                            <span class="status-badge bg-warning text-dark">Fazendo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="fs-4 fw-bold text-muted">Escolha as datas acima para ver as produções.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane fade p-3 bg-white border border-dark border-top-0 rounded-bottom" id="vendas">
+        {% if vendas %}
+        <table class="table table-acessivel table-hover">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>ID</th>
+                    <th>Valor Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vendas %}
+                <tr>
+                    <td>{{ v.data_venda|date:"d/m/Y H:i" }}</td>
+                    <td class="text-muted">#{{ v.id_venda }}</td>
+                    <td class="fs-5 text-success fw-black">R$ {{ v.total_venda }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="fs-4 fw-bold text-muted">Escolha as datas acima para ver as vendas.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 m-4">
+    <a href="{% url 'home' %}" class="btn btn-dark btn-lg border-warning p-3 px-4 fw-bold shadow">
+        ⬅ VOLTAR
+    </a>
+</div>
+{% endblock %}
