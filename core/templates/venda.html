@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    @media (max-width: 767px) {
+        /* Título compacto */
+        .page-title {
+            font-size: 1.3rem !important;
+            padding: 8px 16px !important;
+        }
+
+        /* Imagem do produto menor no mobile */
+        .produto-img {
+            height: 110px !important;
+        }
+
+        .produto-nome {
+            font-size: 0.9rem !important;
+            min-height: 2.2rem !important;
+        }
+
+        .produto-preco {
+            font-size: 1.1rem !important;
+            margin-bottom: 6px !important;
+        }
+
+        .btn-add-venda {
+            font-size: 0.85rem !important;
+            padding: 8px 6px !important;
+            border-radius: 10px !important;
+        }
+
+        /* Carrinho no mobile fica compacto */
+        .carrinho-caixa {
+            position: static !important;
+            border-radius: 16px !important;
+            padding: 14px !important;
+        }
+
+        .carrinho-caixa h3 {
+            font-size: 1.1rem !important;
+            padding-bottom: 10px !important;
+        }
+
+        #cart-list {
+            max-height: 220px !important;
+        }
+
+        .total-caixa {
+            padding: 10px !important;
+            border-radius: 10px !important;
+        }
+
+        .total-caixa .display-6 {
+            font-size: 1.5rem !important;
+        }
+
+        .btn-confirmar {
+            font-size: 1.1rem !important;
+            padding: 14px !important;
+            border-radius: 14px !important;
+        }
+
+        .btn-controles {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 1rem !important;
+        }
+    }
+</style>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="text-center">
+            <h2 class="page-title"><i class="bi bi-cookie me-2"></i>Escolha os Biscoitos</h2>
+        </div>
+        
+        <div class="row g-3">
+            {% for produto in produtos %}
+            <div class="col-6 col-lg-4">
+                <div class="produto-card text-center">
+                    {% if produto.imagem %}
+                        <img src="{{ produto.imagem.url }}" class="w-100 produto-img">
+                    {% else %}
+                        <div class="produto-img bg-light d-flex align-items-center justify-content-center fw-bold">SEM FOTO</div>
+                    {% endif %}
+                    
+                    <div class="p-3">
+                        <div class="produto-nome">{{ produto.nome_produto }}</div>
+                        <div class="produto-preco">R$ {{ produto.preco_unitario }}</div>
+                        
+                        <button type="button" class="btn btn-add-venda w-100 btn-adicionar" 
+                                data-id="{{ produto.id_produto }}" data-nome="{{ produto.nome_produto }}" 
+                                data-preco="{{ produto.preco_unitario|stringformat:'.2f' }}"
+                                {% if produto.qtd_disponivel <= 0 %}disabled{% endif %}>
+                            {% if produto.qtd_disponivel > 0 %}<i class="bi bi-plus-circle me-1"></i>ADICIONAR{% else %}<i class="bi bi-x-circle me-1"></i>ESGOTADO{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="carrinho-caixa sticky-top" style="top: 20px;">
+            <h3 class="fw-black text-center border-bottom border-dark pb-3"><i class="bi bi-cart3 me-2"></i>VENDA</h3>
+            
+            <div id="cart-list" class="my-4" style="max-height: 350px; overflow-y: auto;">
+                <p class="text-center text-muted fw-bold">Carrinho vazio</p>
+            </div>
+
+            <div class="total-caixa mb-4">
+                <div class="fw-bold text-uppercase">Total a Pagar:</div>
+                <div class="display-6 fw-black">R$ <span id="cart-total">0.00</span></div>
+            </div>
+
+            <div class="mb-3">
+            <label class="fw-bold">Forma de Pagamento:</label>
+            <select id="metodo_pagamento" class="form-select border-2 border-dark" onchange="togglePix()">
+                <option value="DINHEIRO">Dinheiro</option>
+                <option value="PIX">Pix</option>
+            </select>
+        </div>
+
+<div id="pix-qr-container" class="text-center p-3 mb-3 border border-success rounded bg-light" style="display: none;">
+    <p class="small fw-bold mb-3">Escaneie para pagar via PIX:</p>
+    <div class="d-flex justify-content-center mb-4">
+        <img id="pix-qr-img" src="" alt="QR Code Pix" style="display: none; width: 180px; height: 180px;">
+    </div>
+    <p id="pix-aviso" class="text-muted small">Adicione produtos ao carrinho para gerar o QR.</p>  
+    <p class="small mb-1">Chave: <strong>07553049344</strong></p>
+</div>
+
+            <button onclick="finalizeSale()" class="btn btn-confirmar w-100 mb-3"><i class="bi bi-check2-circle me-2"></i>VENDER</button>
+            <a href="{% url 'home' %}" class="btn btn-outline-dark w-100 fw-bold border-3 bg-danger"><i class="bi bi-x-circle me-1"></i>CANCELAR</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cart = {};
+
+    function updateCartUI() {
+        const list = document.getElementById('cart-list');
+        const totalSpan = document.getElementById('cart-total');
+        let total = 0;
+        
+        list.innerHTML = '';
+        if (Object.keys(cart).length === 0) {
+            list.innerHTML = '<p class="text-center text-muted fw-bold py-4">Carrinho vazio</p>';
+        } else {
+            for (let id in cart) {
+                let item = cart[id];
+                total += item.price * item.qty;
+                list.innerHTML += `
+                    <div class="border-bottom border-dark pb-3 mb-3">
+                        <div class="fw-bold text-uppercase fs-5 mb-2">${item.name}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <button class="btn btn-danger btn-controles" onclick="removeFromCart(${id})">-</button>
+                                <span class="px-3 fs-4 fw-black">${item.qty}</span>
+                                <button class="btn btn-success btn-controles" onclick="addToCart(${id}, '${item.name}', ${item.price})">+</button>
+                            </div>
+                            <div class="text-end fw-black text-success fs-5">R$ ${(item.price * item.qty).toFixed(2)}</div>
+                        </div>
+                    </div>`;
+            }
+        }
+        totalSpan.innerText = total.toFixed(2);
+        if (document.getElementById('metodo_pagamento').value === 'PIX') {
+            atualizarQRPix();
+        }
+    }
+
+    function addToCart(id, name, price) {
+        if (!cart[id]) cart[id] = { name: name, price: price, qty: 0 };
+        cart[id].qty++;
+        updateCartUI();
+    }
+
+    function removeFromCart(id) {
+        if (cart[id] && cart[id].qty > 0) {
+            cart[id].qty--;
+            if (cart[id].qty === 0) delete cart[id];
+        }
+        updateCartUI();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('.btn-adicionar').forEach(btn => {
+            btn.onclick = () => addToCart(btn.dataset.id, btn.dataset.nome, parseFloat(btn.dataset.preco));
+        });
+    });
+
+    function atualizarQRPix() {
+        const total = parseFloat(document.getElementById('cart-total').innerText);
+        const img = document.getElementById('pix-qr-img');
+        const aviso = document.getElementById('pix-aviso');
+
+        if (total <= 0) {
+            img.style.display = 'none';      // esconde imagem
+            aviso.style.display = 'block';   // mostra aviso
+            return;
+        }
+
+        const payload = gerarPayloadPix('07553049344', total, 'PARNAIBA', 'DIVERSAO BISCOITO');
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payload)}`;
+        
+        img.src = qrUrl;
+        img.style.display = 'block';         // mostra imagem
+        aviso.style.display = 'none';        // esconde aviso
+
+        const valorLabel = document.getElementById('pix-valor-label');
+        if (valorLabel) valorLabel.innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    function togglePix() {
+        const metodo = document.getElementById('metodo_pagamento').value;
+        const container = document.getElementById('pix-qr-container');
+        if (metodo === 'PIX') {
+            atualizarQRPix();
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function finalizeSale() {
+    if (Object.keys(cart).length === 0) return alert('O carrinho está vazio!');
+    
+    const metodo = document.getElementById('metodo_pagamento').value;
+    if (!confirm(`Confirmar venda no ${metodo}?`)) return;
+
+    let cartArray = Object.keys(cart).map(id => ({ id: id, qty: cart[id].qty }));
+    
+    fetch("{% url 'venda_view' %}", {
+        method: "POST",
+        headers: { 
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': '{{ csrf_token }}' 
+        },
+        body: JSON.stringify({ 
+            'carrinho': cartArray,
+            'metodo_pagamento': metodo // Enviando o método escolhido
+        })
+    })
+    .then(res => res.ok ? (alert('Venda feita com sucesso!'), location.reload()) : res.json().then(d => {throw d}))
+    .catch(e => alert('Erro: ' + e.message));
+}
+function gerarPayloadPix(chave, valor, cidade, nome, txid = '***') {
+    function campo(id, valor) {
+        const tamanho = String(valor.length).padStart(2, '0');
+        return `${id}${tamanho}${valor}`;
+    }
+
+    const merchantAccountInfo = campo('00', 'BR.GOV.BCB.PIX') + campo('01', chave);
+    
+    let payload = 
+        campo('00', '01') +                              // Payload version
+        campo('26', merchantAccountInfo) +               // Merchant account info
+        '52040000' +                                     // Merchant category code
+        '5303986' +                                      // Currency (BRL)
+        campo('54', valor.toFixed(2)) +                  // Valor
+        campo('58', 'BR') +                              // País
+        campo('59', nome.substring(0, 25)) +             // Nome do recebedor
+        campo('60', cidade.substring(0, 15)) +           // Cidade
+        campo('62', campo('05', txid));                  // TXID
+
+    // CRC16
+    payload += '6304';
+    let crc = 0xFFFF;
+    for (let i = 0; i < payload.length; i++) {
+        crc ^= payload.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+            crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+        }
+    }
+    return payload + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+</script>
+{% endblock %}

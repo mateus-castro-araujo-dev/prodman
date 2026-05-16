@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .titulo-pagina {
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .btn-voltar-linha {
+        margin-bottom: 1.2rem;
+    }
+
+    .btn-voltar-linha a {
+        background-color: #ffcc00;
+        display: inline-block;
+        font-weight: 800;
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #000;
+        border: 3px solid #000;
+        box-shadow: 5px 5px 0px #000;
+        font-size: 1rem;
+    }
+
+    /* ── ABAS ── */
+    .gastos-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 4px solid #000;
+    }
+
+    .gastos-tab-btn {
+        background-color: #e9ecef;
+        border: 4px solid #000;
+        border-bottom: none;
+        border-radius: 15px 15px 0 0;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        padding: 10px 28px;
+        cursor: pointer;
+        color: #333;
+    }
+
+    .gastos-tab-btn.active {
+        background-color: #ffcc00;
+        color: #000;
+        padding-bottom: 14px;
+    }
+
+    .gastos-tab-content {
+        display: none;
+    }
+
+    .gastos-tab-content.active {
+        display: block;
+    }
+
+    /* ── DESPESA CARD ── */
+    .despesa-card {
+        border: 4px solid #000;
+        border-radius: 16px;
+        background-color: #fff;
+        margin-bottom: 12px;
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 5px 5px 0px #e0e0e0;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .despesa-descricao {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #000;
+        text-transform: uppercase;
+    }
+
+    .despesa-data {
+        font-size: 0.9rem;
+        color: #555;
+        font-weight: 600;
+    }
+
+    .despesa-valor {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 6px 18px;
+        border-radius: 10px;
+        border: 2px solid #000;
+        font-weight: 900;
+        font-size: 1rem;
+    }
+
+    /* ── MODAL ADICIONAR DESPESA ── */
+    .modal-despesa {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-despesa.open {
+        display: flex;
+    }
+
+    .modal-despesa-box {
+        background: #fff;
+        border: 4px solid #000;
+        border-radius: 20px;
+        padding: 30px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 10px 10px 0px #000;
+        margin: 20px;
+    }
+
+    .modal-despesa-box h3 {
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+    }
+
+    .modal-field {
+        margin-bottom: 16px;
+    }
+
+    .modal-field label {
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #004a99;
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .modal-field input {
+        width: 100%;
+        border: 3px solid #000;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 1rem;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .btn-salvar-despesa {
+        background-color: #28a745;
+        color: #fff;
+        border: 3px solid #000;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 1.1rem;
+        padding: 12px;
+        width: 100%;
+        box-shadow: 0 4px 0 #155724;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    .btn-cancelar-despesa {
+        background-color: #e9ecef;
+        color: #000;
+        border: 3px solid #000;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1rem;
+        padding: 10px;
+        width: 100%;
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+    .btn-nova-despesa {
+        background-color: #004a99;
+        color: #ffcc00;
+        border: 3px solid #000;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 1.1rem;
+        padding: 12px 24px;
+        box-shadow: 4px 4px 0px #000;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+        .titulo-pagina .page-title { font-size: 1.4rem !important; padding: 10px 20px !important; }
+        .btn-voltar-linha a { font-size: 0.75rem !important; padding: 6px 12px !important; box-shadow: 3px 3px 0px #000 !important; border-width: 2px !important; }
+        .scroll-container { max-height: none !important; overflow-y: visible !important; }
+        .accordion-button { font-size: 0.9rem !important; padding: 12px 10px !important; }
+        .compra-info { flex-direction: column !important; gap: 6px !important; }
+        .badge-nf { font-size: 0.8rem !important; padding: 4px 8px !important; }
+        .total-valor { font-size: 0.8rem !important; padding: 4px 8px !important; }
+        .table-acessivel { font-size: 0.78rem !important; }
+        .table-acessivel thead th, .table-acessivel tbody td { padding: 6px 4px !important; }
+        .gastos-tab-btn { font-size: 0.85rem !important; padding: 8px 14px !important; }
+        .despesa-card { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<!-- TÍTULO -->
+<div class="titulo-pagina">
+    <h2 class="page-title m-0"><i class="bi bi-wallet2 me-2"></i>Gastos</h2>
+</div>
+
+<!-- VOLTAR -->
+<div class="btn-voltar-linha">
+    <a href="{% url 'home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+</div>
+
+<!-- ABAS -->
+<div class="gastos-tabs">
+    <button class="gastos-tab-btn active" onclick="trocarAba('compras', this)">
+        <i class="bi bi-receipt me-1"></i>Compras
+    </button>
+    <button class="gastos-tab-btn" onclick="trocarAba('despesas', this)">
+        <i class="bi bi-cash-stack me-1"></i>Despesas
+    </button>
+</div>
+
+<!-- ABA COMPRAS -->
+<div id="aba-compras" class="gastos-tab-content active">
+    <div class="scroll-container">
+        <div class="accordion" id="accordionCompras">
+            {% for compra in compras %}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ compra.id_compra }}">
+                        <div class="compra-info">
+                            <span>
+                                <span class="badge-nf">NF: {{ compra.nota_fiscal }}</span>
+                                <strong class="ms-2">{{ compra.data_nf|date:"d/m/Y" }}</strong>
+                            </span>
+                            <span class="total-valor">TOTAL: R$ {{ compra.total_compra }}</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse{{ compra.id_compra }}" class="accordion-collapse collapse" data-bs-parent="#accordionCompras">
+                    <div class="accordion-body bg-white">
+                        <div class="table-responsive">
+                            <table class="table table-acessivel">
+                                <thead>
+                                    <tr>
+                                        <th>Insumo</th>
+                                        <th>Qtd</th>
+                                        <th>Peso/Cont.</th>
+                                        <th>Und.</th>
+                                        <th>Preço Unit.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in compra.itens.all %}
+                                    <tr>
+                                        <td><i class="bi bi-circle-fill text-primary" style="font-size:0.5rem;"></i> {{ item.insumo.nome_insumo }}</td>
+                                        <td>{{ item.qtd_item_compra }}</td>
+                                        <td>{{ item.peso_cont }}</td>
+                                        <td>{{ item.und_medida }}</td>
+                                        <td class="fw-bold text-dark">R$ {{ item.preco_unitario }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-warning border-dark text-center fw-bold py-5">
+                <h3>NENHUMA COMPRA REGISTRADA.</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ABA DESPESAS -->
+<div id="aba-despesas" class="gastos-tab-content">
+    <button class="btn-nova-despesa" onclick="abrirModal()">
+        <i class="bi bi-plus-circle"></i>NOVA DESPESA
+    </button>
+
+    {% for despesa in despesas %}
+    <div class="despesa-card">
+        <div>
+            <div class="despesa-descricao">{{ despesa.descricao }}</div>
+            <div class="despesa-data"><i class="bi bi-calendar3 me-1"></i>{{ despesa.data|date:"d/m/Y" }}</div>
+        </div>
+        <div class="despesa-valor"><i class="bi bi-dash-circle me-1"></i>R$ {{ despesa.valor }}</div>
+    </div>
+    {% empty %}
+    <div class="alert alert-warning border-dark text-center fw-bold py-4">
+        <h3>NENHUMA DESPESA REGISTRADA.</h3>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- MODAL NOVA DESPESA -->
+<div class="modal-despesa" id="modalDespesa">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-cash-stack me-2"></i>Nova Despesa</h3>
+        <form method="POST" action="{% url 'despesa_adicionar' %}">
+            {% csrf_token %}
+            <div class="modal-field">
+                <label>Descrição</label>
+                <input type="text" name="descricao" placeholder="Ex: Energia elétrica, aluguel..." required>
+            </div>
+            <div class="modal-field">
+                <label>Valor (R$)</label>
+                <input type="number" name="valor" step="0.01" min="0.01" placeholder="0,00" required>
+            </div>
+            <div class="modal-field">
+                <label>Data</label>
+                <input type="date" name="data" id="dataHoje">
+            </div>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR</button>
+            <button type="button" class="btn-cancelar-despesa" onclick="fecharModal()"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function trocarAba(aba, btn) {
+        document.querySelectorAll('.gastos-tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.gastos-tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('aba-' + aba).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function abrirModal() {
+        document.getElementById('dataHoje').value = new Date().toISOString().split('T')[0];
+        document.getElementById('modalDespesa').classList.add('open');
+    }
+
+    function fecharModal() {
+        document.getElementById('modalDespesa').classList.remove('open');
+    }
+
+    // Abre aba despesas automaticamente se veio de um redirect após salvar
+    {% if messages %}
+        trocarAba('despesas', document.querySelectorAll('.gastos-tab-btn')[1]);
+    {% endif %}
+</script>
+
+{% endblock %}

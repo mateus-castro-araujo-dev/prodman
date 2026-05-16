@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #004a99; /* Cor sólida como pedido */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .topo {
+            text-align: center;
+            color: white;
+            padding: 50px 20px 30px;
+        }
+
+        .logo-topo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.2));
+        }
+
+        .topo h1 {
+            margin: 0;
+            font-size: 36px;
+            letter-spacing: 1px;
+            font-weight: 800;
+        }
+
+        .topo p {
+            margin-top: 5px;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 450px;
+            width: 90%;
+            margin: 0 auto 50px;
+            background: white;
+            border-radius: 20px; /* Bordas mais arredondadas */
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        h3 { 
+            color: #555; 
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        /* GRID USUÁRIOS */
+        .usuarios {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .card img {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f0f0f0;
+            transition: 0.3s;
+        }
+
+        .card:hover img { border-color: #007bff; box-shadow: 0 5px 15px rgba(0,123,255,0.3); }
+
+        .card p {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        /* LOGIN BOX */
+        .login-box {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 2px solid #eee;
+            outline: none;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: #004a99; background: #f9f9f9; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #004a99;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #003366; transform: scale(1.02); }
+
+        .erro { color: #dc3545; margin-top: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="topo">
+    <img src="{% static 'icons/divertido.png' %}" alt="Logo" class="logo-topo">
+    <h1>APAE</h1>
+    <p>Sistema de Biscoitos</p>
+</div>
+
+<div class="container">
+    <h3 style="text-align:center;">Selecione seu usuário</h3>
+
+    <div class="usuarios">
+        {% for user in usuarios %}
+            <div class="card" onclick="selecionarUsuario('{{ user.username }}')">
+                {% if user.perfil.foto %}
+                    <img src="{{ user.perfil.foto.url }}">
+                {% else %}
+                    <img src="{% static 'img/default.png' %}">
+                {% endif %}
+                <p>{{ user.username }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="login-box" id="loginBox">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="username" id="username">
+            <input type="password" name="password" placeholder="Digite sua senha">
+            <button type="submit">Entrar no Sistema</button>
+
+            {% if erro %}
+                <div class="erro">⚠️ {{ erro }}</div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script>
+function selecionarUsuario(username){
+    document.getElementById("username").value = username;
+    document.getElementById("loginBox").style.display = "block";
+    // Foca automaticamente no campo de senha ao clicar no usuário
+    document.querySelector('input[type="password"]').focus();
+}
+</script>
+
+</body>
+</html>

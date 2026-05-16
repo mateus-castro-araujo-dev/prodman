@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="text-center">
+    <h2 class="page-title"><i class="bi bi-plus-circle me-2"></i>Iniciar Produção</h2>
+    <p class="fw-bold text-muted mt-n2">Escolha o que você vai cozinhar agora:</p>
+</div>
+
+<style>
+    @media (max-width: 600px) {
+        .page-title {
+            font-size: 1.3rem !important;
+            padding: 8px 16px !important;
+        }
+
+        .img-previa {
+            height: 130px !important;
+        }
+
+        .receita-titulo {
+            font-size: 1.1rem !important;
+        }
+
+        .card-body.p-4 {
+            padding: 14px !important;
+        }
+
+        /* Botão voltar fixo visível no mobile */
+        .position-fixed.bottom-0 {
+            bottom: 0 !important;
+            right: 0 !important;
+            margin: 12px !important;
+        }
+
+        /* Adiciona padding no fundo para não sobrepor o botão voltar */
+        .scroll-area {
+            padding-bottom: 80px !important;
+        }
+    }
+</style>
+
+<div class="scroll-area">
+    <div class="row g-4">
+        {% for receita in receitas %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="receita-card-escolha">
+                {% if receita.imagem %}
+                    <img src="{{ receita.imagem.url }}" class="img-previa">
+                {% else %}
+                    <div class="img-previa d-flex align-items-center justify-content-center text-muted fw-bold">SEM FOTO</div>
+                {% endif %}
+                
+                <div class="card-body p-4 text-center">
+                    <h5 class="receita-titulo">{{ receita.nome_receita }}</h5>
+                    <p class="text-muted fw-bold mb-3"><i class="bi bi-box-seam me-1"></i>Faz: {{ receita.produto.nome_produto }}</p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="receita_id" value="{{ receita.id_receita }}">
+                        
+                        <label class="lote-label">Quantas vezes a receita?</label>
+                        <div class="input-lote-container">
+                            <span class="input-lote-texto">LOTES:</span>
+                            <input type="number" name="qtd_batches" class="form-control input-lote-campo" value="1" min="1" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-iniciar-grande w-100">
+                            <i class="bi bi-fire me-1"></i>COMEÇAR AGORA
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 m-4">
+    <a href="{% url 'producao_list' %}" class="btn btn-dark btn-lg border-warning p-3 px-4 fw-bold shadow">
+        <i class="bi bi-arrow-left me-1"></i>VOLTAR
+    </a>
+</div>
+{% endblock %}
