@@ -1,8 +1,17 @@
 {% extends 'base.html' %}
+{% load emoji_tags %}
 
 {% block content %}
 
 <style>
+    .emoji-produto {
+        font-size: 5rem;
+        line-height: 1;
+        filter: drop-shadow(2px 2px 0 #000);
+    }
+    @media (max-width: 767px) {
+        .emoji-produto { font-size: 3.5rem; }
+    }
     @media (max-width: 767px) {
         /* Título compacto */
         .page-title {
@@ -83,7 +92,7 @@
                     {% if produto.imagem %}
                         <img src="{{ produto.imagem.url }}" class="w-100 produto-img">
                     {% else %}
-                        <div class="produto-img bg-light d-flex align-items-center justify-content-center fw-bold">SEM FOTO</div>
+                        <div class="produto-img bg-light d-flex align-items-center justify-content-center emoji-produto">{{ produto.nome_produto|emoji_for }}</div>
                     {% endif %}
                     
                     <div class="p-3">

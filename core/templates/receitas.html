@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load emoji_tags %}
 {% block content %}
 
 <style>
@@ -59,6 +60,15 @@
         height: 100%;
         object-fit: cover;
         display: block;
+    }
+
+    .emoji-ilustracao {
+        font-size: 6rem;
+        line-height: 1;
+        filter: drop-shadow(3px 3px 0 #000);
+    }
+    @media (max-width: 600px) {
+        .emoji-ilustracao { font-size: 4.5rem; }
     }
 
     .receita-conteudo {
@@ -152,7 +162,7 @@
                         {% if receita.imagem %}
                             <img src="{{ receita.imagem.url }}" alt="{{ receita.nome_receita }}">
                         {% else %}
-                            <span class="fw-bold text-muted">SEM FOTO</span>
+                            <span class="emoji-ilustracao">{{ receita.nome_receita|emoji_for }}</span>
                         {% endif %}
                     </div>
                     <div class="receita-conteudo">

@@ -87,8 +87,9 @@
 </head>
 <body>
     <nav class="navbar navbar-dark">
-        <div class="container justify-content-center">
+        <div class="container justify-content-center position-relative">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}"><img src="{% static 'icons/divertido.png' %}" alt="" style="height:38px;width:auto;">APAE - GESTÃO DE BISCOITOS</a>
+            <a href="{% url 'login' %}" class="position-absolute end-0 top-50 translate-middle-y" style="color:#fff;font-size:1.6rem;line-height:1;text-decoration:none;"><i class="bi bi-person"></i></a>
         </div>
     </nav>
     <div class="container">

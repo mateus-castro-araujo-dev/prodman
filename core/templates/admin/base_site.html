@@ -1,0 +1,385 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | APAE Admin{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="{% static 'icons/divertido.png' %}" alt="" style="height:30px;width:auto;">
+        <span style="font-weight:800;font-size:1.05rem;color:var(--header-branding-color);letter-spacing:0.5px;">APAE</span>
+        <span style="font-weight:400;font-size:0.8rem;color:var(--header-color);opacity:.75;margin-left:2px;">Gestão de Biscoitos</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TEMA CLARO — sobrescreve variáveis do Django
+   ══════════════════════════════════════════ */
+:root,
+html[data-theme="light"] {
+    /* Marca */
+    --primary:               #004a99;
+    --secondary:             #003370;
+    --accent:                #ffcc00;
+
+    /* Textos e fundos */
+    --body-fg:               #0a1628;
+    --body-bg:               #edf1f7;
+    --body-quiet-color:      #3d5068;
+    --body-loud-color:       #000000;
+    --darkened-bg:           #d8dfe9;
+
+    /* Header */
+    --header-color:          #e8edf5;
+    --header-branding-color: #ffcc00;
+    --header-bg:             #004a99;
+    --header-link-color:     #ffcc00;
+
+    /* Breadcrumbs */
+    --breadcrumbs-fg:        #d0d8e8;
+    --breadcrumbs-link-fg:   #ffcc00;
+    --breadcrumbs-bg:        #003370;
+
+    /* Links */
+    --link-fg:               #0059b8;
+    --link-hover-color:      #003370;
+    --link-selected-fg:      #004a99;
+
+    /* Bordas */
+    --hairline-color:        #dde3ec;
+    --border-color:          #c8d0dc;
+
+    /* Seleção / hover */
+    --selected-bg:           #e6f0ff;
+    --selected-row:          #eef4ff;
+
+    /* Botão padrão (Salvar e continuar) */
+    --button-fg:             #ffffff;
+    --button-bg:             #004a99;
+    --button-hover-bg:       #003370;
+
+    /* Botão primário (Salvar) */
+    --default-button-fg:     #0d0d0d;
+    --default-button-bg:     #ffcc00;
+    --default-button-hover-bg: #e6b800;
+
+    /* Botão fechar */
+    --close-button-bg:       #888;
+    --close-button-hover-bg: #666;
+
+    /* Botão deletar */
+    --delete-button-bg:      #dc2626;
+    --delete-button-hover-bg:#b91c1c;
+
+    /* Object tools */
+    --object-tools-fg:       #0d0d0d;
+    --object-tools-bg:       #ffcc00;
+    --object-tools-hover-bg: #e6b800;
+
+    /* Mensagens */
+    --message-success-bg:    #ecfdf5;
+    --message-warning-bg:    #fffbeb;
+    --message-error-bg:      #fef2f2;
+
+    /* Erros */
+    --error-fg:              #dc2626;
+}
+
+/* ══════════════════════════════════════════
+   TEMA ESCURO
+   ══════════════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+    :root,
+    html[data-theme="dark"] {
+        --primary:               #1a6fd4;
+        --secondary:             #0d4fa0;
+        --accent:                #ffcc00;
+
+        --body-fg:               #f0f5ff;
+        --body-bg:               #0b1120;
+        --body-quiet-color:      #a8bcd4;
+        --body-loud-color:       #ffffff;
+        --darkened-bg:           #162030;
+
+        --header-color:          #c8d8f0;
+        --header-branding-color: #ffcc00;
+        --header-bg:             #0a1929;
+        --header-link-color:     #ffcc00;
+
+        --breadcrumbs-fg:        #8a9ab5;
+        --breadcrumbs-link-fg:   #ffcc00;
+        --breadcrumbs-bg:        #0d1f35;
+
+        --link-fg:               #5b9ef0;
+        --link-hover-color:      #88bbff;
+        --link-selected-fg:      #5b9ef0;
+
+        --hairline-color:        #2a3a52;
+        --border-color:          #2e4060;
+
+        --selected-bg:           #1a2f50;
+        --selected-row:          #162540;
+
+        --button-fg:             #ffffff;
+        --button-bg:             #1a6fd4;
+        --button-hover-bg:       #0d4fa0;
+
+        --default-button-fg:     #0d0d0d;
+        --default-button-bg:     #ffcc00;
+        --default-button-hover-bg: #e6b800;
+
+        --close-button-bg:       #555;
+        --close-button-hover-bg: #444;
+
+        --delete-button-bg:      #dc2626;
+        --delete-button-hover-bg:#b91c1c;
+
+        --object-tools-fg:       #0d0d0d;
+        --object-tools-bg:       #ffcc00;
+        --object-tools-hover-bg: #e6b800;
+
+        --message-success-bg:    #052e16;
+        --message-warning-bg:    #1c1100;
+        --message-error-bg:      #1f0606;
+
+        --error-fg:              #f87171;
+    }
+}
+
+html[data-theme="dark"] {
+    --primary:               #1a6fd4;
+    --secondary:             #0d4fa0;
+    --accent:                #ffcc00;
+    --body-fg:               #dce4f0;
+    --body-bg:               #111827;
+    --body-quiet-color:      #8a9ab5;
+    --body-loud-color:       #f0f4ff;
+    --darkened-bg:           #1e2a3d;
+    --header-color:          #c8d8f0;
+    --header-branding-color: #ffcc00;
+    --header-bg:             #0a1929;
+    --header-link-color:     #ffcc00;
+    --breadcrumbs-fg:        #8a9ab5;
+    --breadcrumbs-link-fg:   #ffcc00;
+    --breadcrumbs-bg:        #0d1f35;
+    --link-fg:               #5b9ef0;
+    --link-hover-color:      #88bbff;
+    --link-selected-fg:      #5b9ef0;
+    --hairline-color:        #2a3a52;
+    --border-color:          #2e4060;
+    --selected-bg:           #1a2f50;
+    --selected-row:          #162540;
+    --button-fg:             #ffffff;
+    --button-bg:             #1a6fd4;
+    --button-hover-bg:       #0d4fa0;
+    --default-button-fg:     #0d0d0d;
+    --default-button-bg:     #ffcc00;
+    --default-button-hover-bg: #e6b800;
+    --close-button-bg:       #555;
+    --close-button-hover-bg: #444;
+    --delete-button-bg:      #dc2626;
+    --delete-button-hover-bg:#b91c1c;
+    --object-tools-fg:       #0d0d0d;
+    --object-tools-bg:       #ffcc00;
+    --object-tools-hover-bg: #e6b800;
+    --message-success-bg:    #052e16;
+    --message-warning-bg:    #1c1100;
+    --message-error-bg:      #1f0606;
+    --error-fg:              #f87171;
+}
+
+/* ══════════════════════════════════════════
+   TIPOGRAFIA
+   ══════════════════════════════════════════ */
+* {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+}
+
+body {
+    font-size: 15px !important;
+}
+
+#content h1 {
+    font-size: 1.55rem !important;
+    font-weight: 700 !important;
+}
+
+p, li, td, th, label, input, select, textarea, .help {
+    font-size: 0.95rem !important;
+}
+
+/* ══════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════ */
+#header {
+    border-bottom: 3px solid var(--accent) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25) !important;
+}
+
+/* ══════════════════════════════════════════
+   MÓDULOS — arredondamento e sombra suave
+   ══════════════════════════════════════════ */
+.module {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,.08) !important;
+}
+
+.module caption,
+.module > h2 {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+}
+
+/* ══════════════════════════════════════════
+   TABELAS
+   ══════════════════════════════════════════ */
+#result_list {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,.08) !important;
+}
+
+#result_list thead th {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    padding: 12px 14px !important;
+    border: none !important;
+}
+
+#result_list tbody td {
+    padding: 11px 14px !important;
+    font-size: 0.875rem !important;
+    vertical-align: middle !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* ══════════════════════════════════════════
+   FIELDSETS — formulários
+   ══════════════════════════════════════════ */
+fieldset {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,.07) !important;
+    margin-bottom: 16px !important;
+}
+
+fieldset h2 {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    padding: 10px 16px !important;
+}
+
+/* ══════════════════════════════════════════
+   INPUTS — bordas arredondadas
+   ══════════════════════════════════════════ */
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=number],
+input[type=url],
+input[type=search],
+textarea,
+select {
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.88rem !important;
+    transition: border-color .2s, box-shadow .2s !important;
+}
+
+/* ══════════════════════════════════════════
+   BOTÕES — arredondamento refinado
+   ══════════════════════════════════════════ */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
+a.button {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.2px !important;
+    transition: background .2s, transform .1s, box-shadow .2s !important;
+}
+
+.button:hover,
+input[type=submit]:hover,
+a.button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15) !important;
+}
+
+/* ══════════════════════════════════════════
+   SUBMIT ROW
+   ══════════════════════════════════════════ */
+.submit-row {
+    border-radius: 0 0 10px 10px !important;
+    padding: 14px 18px !important;
+    gap: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* ══════════════════════════════════════════
+   PAGINAÇÃO
+   ══════════════════════════════════════════ */
+.paginator {
+    font-size: 0.82rem !important;
+    padding: 10px 16px !important;
+}
+
+/* ══════════════════════════════════════════
+   FILTRO LATERAL
+   ══════════════════════════════════════════ */
+#changelist-filter {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,.08) !important;
+}
+
+#changelist-filter h2 {
+    font-size: 0.72rem !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+}
+
+#changelist-filter h3 {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* ══════════════════════════════════════════
+   MENSAGENS
+   ══════════════════════════════════════════ */
+ul.messagelist li {
+    border-radius: 8px !important;
+    padding: 10px 16px !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 8px !important;
+}
+
+/* ══════════════════════════════════════════
+   SCROLLBAR SUTIL
+   ══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--body-quiet-color); }
+</style>
+{% endblock %}

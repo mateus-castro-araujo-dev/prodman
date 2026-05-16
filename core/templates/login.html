@@ -90,6 +90,22 @@
 
         .card:hover img { border-color: #007bff; box-shadow: 0 5px 15px rgba(0,123,255,0.3); }
 
+        .admin-avatar {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 4px solid #f0f0f0;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto;
+            transition: 0.3s;
+        }
+
+        .card:hover .admin-avatar { border-color: #004a99; box-shadow: 0 5px 15px rgba(0,74,153,0.3); }
+
         .card p {
             margin-top: 10px;
             font-size: 14px;
@@ -163,6 +179,11 @@
                 <p>{{ user.username }}</p>
             </div>
         {% endfor %}
+
+        <div class="card" onclick="window.location.href='/admin/'">
+            <div class="admin-avatar">⚙️</div>
+            <p>Admin</p>
+        </div>
     </div>
 
     <div class="login-box" id="loginBox">
