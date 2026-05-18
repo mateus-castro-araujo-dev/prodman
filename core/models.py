@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Insumo(models.Model):
@@ -162,4 +164,10 @@ class Perfil(models.Model):
     foto = models.ImageField(upload_to='fotos/', null=True, blank=True)
 
     def __str__(self):
-        return self.user.username    
+        return self.user.username
+
+
+@receiver(post_save, sender=User)
+def criar_perfil_automatico(sender, instance, created, **kwargs):
+    if created:
+        Perfil.objects.get_or_create(user=instance)
