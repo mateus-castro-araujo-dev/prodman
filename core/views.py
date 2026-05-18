@@ -247,7 +247,7 @@ def relatorios(request):
 # --- LOGIN ---
 
 def login_view(request):
-    usuarios = User.objects.all()
+    usuarios = User.objects.filter(is_staff=False, is_superuser=False)
 
     if request.method == "POST":
         username = request.POST.get("username")
