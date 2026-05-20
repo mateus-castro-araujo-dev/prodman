@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .titulo-pagina { text-align: center; margin-bottom: 12px; }
+    .btn-voltar-linha { margin-bottom: 1.5rem; }
+    .btn-voltar-linha a {
+        background-color: #ffcc00; display: inline-block; font-weight: 800;
+        padding: 10px 20px; border-radius: 10px; text-decoration: none;
+        color: #000; border: 3px solid #000; box-shadow: 5px 5px 0px #000; font-size: 1rem;
+    }
+    .usuarios-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; margin-bottom: 20px;
+    }
+    .usuario-card { text-align: center; }
+    .usuario-avatar {
+        width: 90px; height: 90px; border-radius: 50%; border: 4px solid #000;
+        object-fit: cover; margin: 0 auto 10px; display: block;
+    }
+    .usuario-avatar-placeholder {
+        width: 90px; height: 90px; border-radius: 50%; border: 4px solid #000;
+        background: #1a1a2e; display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem; margin: 0 auto 10px;
+    }
+    .usuario-nome { font-weight: 800; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 4px; }
+    .usuario-tipo {
+        background: #ffcc00; border: 2px solid #000; border-radius: 20px;
+        font-size: 0.7rem; font-weight: 800; padding: 2px 10px; display: inline-block; margin-bottom: 6px;
+    }
+    .usuario-tipo.admin { background: #004a99; color: #ffcc00; }
+    .btn-del-user {
+        background: #dc3545; color: #fff; border: 2px solid #000; border-radius: 8px;
+        font-size: 0.75rem; font-weight: 800; padding: 4px 10px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-edit-user {
+        background: #004a99; color: #ffcc00; border: 2px solid #000; border-radius: 8px;
+        font-size: 0.75rem; font-weight: 800; padding: 4px 10px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-novo {
+        background-color: #004a99; color: #ffcc00; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px 24px; box-shadow: 4px 4px 0px #000;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px;
+    }
+    .modal-despesa {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+        z-index: 1050; align-items: center; justify-content: center;
+    }
+    .modal-despesa.open { display: flex; }
+    .modal-despesa-box {
+        background: #fff; border: 4px solid #000; border-radius: 20px; padding: 30px;
+        width: 100%; max-width: 440px; box-shadow: 10px 10px 0px #000; margin: 20px;
+    }
+    .modal-despesa-box h3 { font-weight: 900; text-transform: uppercase; margin-bottom: 20px; font-size: 1.3rem; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { font-weight: 800; text-transform: uppercase; color: #004a99; font-size: 0.9rem; display: block; margin-bottom: 6px; }
+    .modal-field input {
+        width: 100%; border: 3px solid #000; border-radius: 10px;
+        padding: 10px 14px; font-size: 1rem; font-family: inherit; font-weight: 700;
+    }
+    .btn-salvar-despesa {
+        background-color: #28a745; color: #fff; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px; width: 100%;
+        box-shadow: 0 4px 0 #155724; cursor: pointer; margin-top: 8px;
+    }
+    .btn-cancelar-despesa {
+        background-color: #e9ecef; color: #000; border: 3px solid #000; border-radius: 12px;
+        font-weight: 800; font-size: 1rem; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer;
+    }
+    @media(max-width:600px) {
+        .usuarios-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .usuario-avatar, .usuario-avatar-placeholder { width: 70px; height: 70px; }
+        .usuario-avatar-placeholder { font-size: 1.8rem; }
+        .usuario-nome { font-size: 0.8rem; }
+    }
+</style>
+
+<div class="titulo-pagina">
+    <h2 class="page-title m-0"><i class="bi bi-people-fill me-2"></i>Usuários</h2>
+</div>
+<div class="btn-voltar-linha d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <a href="{% url 'painel_home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+    <button class="btn-novo" style="margin-bottom:0" onclick="abrirNovo()">
+        <i class="bi bi-person-plus"></i> NOVO USUÁRIO
+    </button>
+</div>
+
+<div class="usuarios-grid">
+    {% for u in usuarios %}
+    <div class="usuario-card">
+        {% if u.perfil.foto %}
+            <img src="{{ u.perfil.foto.url }}" class="usuario-avatar">
+        {% else %}
+            <div class="usuario-avatar-placeholder">👤</div>
+        {% endif %}
+        <div class="usuario-nome">{{ u.username }}</div>
+        <div class="usuario-tipo {% if u.is_superuser %}admin{% endif %}">
+            {% if u.is_superuser %}Admin{% else %}Usuário{% endif %}
+        </div>
+        {% if not u.is_superuser %}
+        <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:4px">
+            <button type="button" class="btn-edit-user"
+                onclick="abrirEditar({{ u.id }}, '{{ u.username }}')">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <form method="POST" style="display:inline" onsubmit="return confirm('Deletar {{ u.username }}?')">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="delete_user">
+                <input type="hidden" name="id" value="{{ u.id }}">
+                <button type="submit" class="btn-del-user"><i class="bi bi-trash"></i></button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1">
+        <div class="alert alert-warning border-dark text-center fw-bold">Nenhum usuário cadastrado.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- MODAL NOVO USUÁRIO -->
+<div class="modal-despesa" id="modalNovoUser">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-person-plus me-2"></i>Novo Usuário</h3>
+        <form method="POST" enctype="multipart/form-data" onsubmit="return validarSenhasNovo()">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="add_user">
+            <div class="modal-field">
+                <label>Nome de usuário</label>
+                <input type="text" name="username" placeholder="Ex: maria" required>
+            </div>
+            <div class="modal-field">
+                <label>Senha</label>
+                <input type="password" name="password" id="newPass" placeholder="Mínimo 4 caracteres" required>
+            </div>
+            <div class="modal-field">
+                <label>Confirmar Senha</label>
+                <input type="password" name="confirm" id="newConfirm" placeholder="Repita a senha" required>
+                <span id="errNew" style="color:#dc3545;font-size:.8rem;display:none;font-weight:700">⚠ Senhas não coincidem</span>
+            </div>
+            <div class="modal-field">
+                <label>Foto de Perfil (opcional)</label>
+                <input type="file" name="foto" accept="image/*">
+            </div>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>CRIAR USUÁRIO</button>
+            <button type="button" class="btn-cancelar-despesa" onclick="document.getElementById('modalNovoUser').classList.remove('open')"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDITAR USUÁRIO -->
+<div class="modal-despesa" id="modalEditarUser">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-pencil me-2"></i>Editar Usuário</h3>
+        <form method="POST" enctype="multipart/form-data" onsubmit="return validarSenhasEdit()">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="edit_user">
+            <input type="hidden" name="id" id="edit-user-id">
+            <div class="modal-field">
+                <label>Nome de usuário</label>
+                <input type="text" name="username" id="edit-user-username" required>
+            </div>
+            <div class="modal-field">
+                <label>Nova Senha (deixe vazio para manter)</label>
+                <input type="password" name="password" id="editPass" placeholder="Opcional">
+            </div>
+            <div class="modal-field">
+                <label>Confirmar Nova Senha</label>
+                <input type="password" name="confirm" id="editConfirm" placeholder="Repita a nova senha">
+                <span id="errEdit" style="color:#dc3545;font-size:.8rem;display:none;font-weight:700">⚠ Senhas não coincidem</span>
+            </div>
+            <div class="modal-field">
+                <label>Nova Foto de Perfil (opcional)</label>
+                <input type="file" name="foto" accept="image/*">
+            </div>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR ALTERAÇÕES</button>
+            <button type="button" class="btn-cancelar-despesa" onclick="document.getElementById('modalEditarUser').classList.remove('open')"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirNovo() {
+    document.getElementById('errNew').style.display = 'none';
+    document.getElementById('modalNovoUser').classList.add('open');
+}
+function abrirEditar(id, username) {
+    document.getElementById('edit-user-id').value = id;
+    document.getElementById('edit-user-username').value = username;
+    document.getElementById('editPass').value = '';
+    document.getElementById('editConfirm').value = '';
+    document.getElementById('errEdit').style.display = 'none';
+    document.getElementById('modalEditarUser').classList.add('open');
+}
+function validarSenhasNovo() {
+    const p = document.getElementById('newPass').value;
+    const c = document.getElementById('newConfirm').value;
+    if (p !== c) {
+        document.getElementById('errNew').style.display = 'block';
+        return false;
+    }
+    return true;
+}
+function validarSenhasEdit() {
+    const p = document.getElementById('editPass').value;
+    const c = document.getElementById('editConfirm').value;
+    if (p && p !== c) {
+        document.getElementById('errEdit').style.display = 'block';
+        return false;
+    }
+    return true;
+}
+</script>
+
+{% endblock %}

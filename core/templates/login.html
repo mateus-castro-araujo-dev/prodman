@@ -180,7 +180,7 @@
             </div>
         {% endfor %}
 
-        <div class="card" onclick="window.location.href='/admin/'">
+        <div class="card" onclick="selecionarAdmin()">
             <div class="admin-avatar">⚙️</div>
             <p>Admin</p>
         </div>
@@ -189,7 +189,7 @@
     <div class="login-box" id="loginBox">
         <form method="POST">
             {% csrf_token %}
-            <input type="hidden" name="username" id="username">
+            <input type="text" name="username" id="username" placeholder="Usuário" style="margin-bottom:10px;display:none" id="usernameField">
             <input type="password" name="password" placeholder="Digite sua senha">
             <button type="submit">Entrar no Sistema</button>
 
@@ -203,9 +203,15 @@
 <script>
 function selecionarUsuario(username){
     document.getElementById("username").value = username;
+    document.getElementById("username").style.display = "none";
     document.getElementById("loginBox").style.display = "block";
-    // Foca automaticamente no campo de senha ao clicar no usuário
     document.querySelector('input[type="password"]').focus();
+}
+function selecionarAdmin(){
+    document.getElementById("username").value = "";
+    document.getElementById("username").style.display = "block";
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("username").focus();
 }
 </script>
 

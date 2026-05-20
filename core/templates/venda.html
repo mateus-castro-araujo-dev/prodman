@@ -81,8 +81,13 @@
 
 <div class="row g-4">
     <div class="col-md-8">
-        <div class="text-center">
+        <div class="text-center mb-2">
             <h2 class="page-title"><i class="bi bi-cookie me-2"></i>Escolha os Biscoitos</h2>
+        </div>
+        <div class="mb-5 mt-2">
+            <a href="{% url 'home' %}" style="background-color:#ffcc00;box-shadow:6px 6px 0px #000;border:3px solid #000;border-radius:12px;" class="btn fw-bold p-3 px-4">
+                <i class="bi bi-arrow-left me-1"></i>VOLTAR
+            </a>
         </div>
         
         <div class="row g-3">
@@ -143,7 +148,7 @@
 </div>
 
             <button onclick="finalizeSale()" class="btn btn-confirmar w-100 mb-3"><i class="bi bi-check2-circle me-2"></i>VENDER</button>
-            <a href="{% url 'home' %}" class="btn btn-outline-dark w-100 fw-bold border-3 bg-danger"><i class="bi bi-x-circle me-1"></i>CANCELAR</a>
+            <button onclick="limparCarrinho()" class="btn btn-outline-dark w-100 fw-bold border-3 bg-danger" style="color:#fff;"><i class="bi bi-trash me-1"></i>LIMPAR CARRINHO</button>
         </div>
     </div>
 </div>
@@ -233,6 +238,14 @@
             container.style.display = 'block';
         } else {
             container.style.display = 'none';
+        }
+    }
+
+    function limparCarrinho() {
+        if (Object.keys(cart).length === 0) return alert('O carrinho já está vazio!');
+        if (confirm('Remover todos os produtos do carrinho?')) {
+            cart = {};
+            updateCartUI();
         }
     }
 

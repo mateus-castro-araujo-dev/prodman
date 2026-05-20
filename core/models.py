@@ -21,10 +21,17 @@ class Insumo(models.Model):
 class Compra(models.Model):
     id_compra = models.AutoField(primary_key=True)
     nota_fiscal = models.CharField(max_length=48)
+    fornecedor = models.CharField(max_length=128, blank=True, default='')
     data_nf = models.DateField()
 
     def total_compra(self):
-        return sum(item.preco_unitario * item.qtd_item_compra for item in self.itens.all())
+        return sum(item.subtotal_com_desconto for item in self.itens.all())
+
+    def total_bruto(self):
+        return sum(item.subtotal_bruto for item in self.itens.all())
+
+    def total_descontos(self):
+        return sum(item.desconto_total for item in self.itens.all())
 
     class Meta:
         db_table = 'compra'
@@ -52,7 +59,29 @@ class ItemCompra(models.Model):
     peso_cont = models.IntegerField()
     und_medida = models.CharField(max_length=8)
     preco_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    desconto_percentual = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    desconto_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     data_validade = models.DateField(null=True, blank=True)
+
+    @property
+    def subtotal_bruto(self):
+        return float(self.preco_unitario) * self.qtd_item_compra
+
+    @property
+    def desconto_total(self):
+        bruto = self.subtotal_bruto
+        d_perc = (bruto * float(self.desconto_percentual)) / 100
+        return d_perc + float(self.desconto_valor)
+
+    @property
+    def subtotal_com_desconto(self):
+        return max(self.subtotal_bruto - self.desconto_total, 0)
+
+    @property
+    def preco_unitario_final(self):
+        if self.qtd_item_compra == 0:
+            return 0
+        return self.subtotal_com_desconto / self.qtd_item_compra
 
     class Meta:
         db_table = 'item_compra'

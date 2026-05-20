@@ -1,0 +1,475 @@
+{% extends 'base.html' %}
+{% load emoji_tags %}
+{% block content %}
+
+<style>
+    .titulo-pagina { text-align: center; margin-bottom: 12px; }
+    .btn-voltar-linha { margin-bottom: 1.2rem; }
+    .btn-voltar-linha a {
+        background-color: #ffcc00; display: inline-block; font-weight: 800;
+        padding: 10px 20px; border-radius: 10px; text-decoration: none;
+        color: #000; border: 3px solid #000; box-shadow: 5px 5px 0px #000; font-size: 1rem;
+    }
+    .receita-card {
+        border: 4px solid #000; border-radius: 25px; background-color: #fff;
+        overflow: hidden; height: 100%; box-shadow: 8px 8px 0px #eee;
+        display: flex; flex-direction: column;
+    }
+    .receita-inner { display: flex; flex-direction: row; flex: 1; }
+    .receita-foto {
+        width: 33%; flex-shrink: 0; background-color: #f1f1f1;
+        border-right: 4px solid #000; display: flex; align-items: center;
+        justify-content: center; min-height: 200px;
+    }
+    .receita-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .emoji-ilustracao { font-size: 6rem; }
+    .receita-conteudo { padding: 20px; flex: 1; }
+    .receita-nome { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; }
+    .ingrediente-lista { list-style: none; padding: 0; margin: 0; }
+    .ingrediente-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.9rem; }
+    .check-icon { color: #004a99; font-weight: 900; }
+    .qtd-tecnica { font-weight: 800; }
+    .medida-caseira { color: #666; font-style: italic; font-size: 0.85rem; }
+    .receita-acoes { padding: 10px 16px 14px; border-top: 3px solid #eee; display: flex; gap: 8px; }
+    .btn-del-receita {
+        background: #dc3545; color: #fff; border: 2px solid #000; border-radius: 8px;
+        font-weight: 800; font-size: 0.8rem; padding: 6px 12px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-novo {
+        background-color: #004a99; color: #ffcc00; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px 24px; box-shadow: 4px 4px 0px #000;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px;
+    }
+    .modal-despesa {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+        z-index: 1050; align-items: center; justify-content: center;
+    }
+    .modal-despesa.open { display: flex; }
+    .modal-despesa-box {
+        background: #fff; border: 4px solid #000; border-radius: 20px; padding: 30px;
+        width: 100%; max-width: 560px; box-shadow: 10px 10px 0px #000;
+        margin: 20px; max-height: 92vh; overflow-y: auto;
+    }
+    .modal-despesa-box h3 { font-weight: 900; text-transform: uppercase; margin-bottom: 20px; font-size: 1.3rem; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { font-weight: 800; text-transform: uppercase; color: #004a99; font-size: 0.85rem; display: block; margin-bottom: 5px; }
+    .modal-field input, .modal-field select {
+        width: 100%; border: 3px solid #000; border-radius: 10px;
+        padding: 9px 12px; font-size: 0.95rem; font-family: inherit; font-weight: 700;
+    }
+    .btn-salvar-despesa {
+        background-color: #28a745; color: #fff; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px; width: 100%;
+        box-shadow: 0 4px 0 #155724; cursor: pointer; margin-top: 8px;
+    }
+    .btn-cancelar-despesa {
+        background-color: #e9ecef; color: #000; border: 3px solid #000; border-radius: 12px;
+        font-weight: 800; font-size: 1rem; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer;
+    }
+    /* ── INGREDIENTE: card vertical ── */
+    .ing-bloco {
+        border: 2px solid #000; border-radius: 12px;
+        padding: 12px; margin-top: 10px; background: #fafafa;
+        position: relative;
+    }
+    .ing-bloco .titulo-ing {
+        font-weight: 800; color: #004a99; font-size: 0.8rem;
+        text-transform: uppercase; margin-bottom: 8px;
+    }
+    .ing-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .ing-grid .full { grid-column: 1 / -1; }
+    .ing-grid label {
+        font-size: 0.72rem; font-weight: 700; color: #555;
+        text-transform: uppercase; display: block; margin-bottom: 3px;
+    }
+    .ing-grid input, .ing-grid select {
+        width: 100%; border: 2px solid #000; border-radius: 8px;
+        padding: 6px 10px; font-weight: 700; font-size: 0.88rem;
+    }
+    .btn-remover-ing {
+        position: absolute; top: 6px; right: 6px;
+        background: #dc3545; color: #fff;
+        border: 2px solid #000; border-radius: 6px;
+        width: 26px; height: 26px;
+        font-weight: 900; cursor: pointer;
+        line-height: 1; padding: 0;
+    }
+
+    /* ── ABAS ── */
+    .gastos-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 4px solid #000; }
+    .gastos-tab-btn {
+        background-color: #e9ecef; border: 4px solid #000; border-bottom: none;
+        border-radius: 15px 15px 0 0; font-weight: 800; font-size: 1rem;
+        text-transform: uppercase; padding: 10px 24px; cursor: pointer; color: #333;
+    }
+    .gastos-tab-btn.active { background-color: #ffcc00; color: #000; padding-bottom: 14px; }
+    .gastos-tab-content { display: none; }
+    .gastos-tab-content.active { display: block; }
+
+    /* ── CARD BISCOITO ── */
+    .biscoito-card {
+        border: 4px solid #000; border-radius: 20px; background: #fff;
+        box-shadow: 6px 6px 0px #eee; overflow: hidden;
+        display: flex; flex-direction: column; height: 100%;
+    }
+    .biscoito-foto {
+        width: 100%; height: 150px; background: #f5f5f5;
+        border-bottom: 3px solid #000; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .biscoito-foto img { width: 100%; height: 100%; object-fit: cover; }
+    .biscoito-emoji { font-size: 3.5rem; }
+    .biscoito-info { padding: 14px; flex: 1; }
+    .biscoito-nome { font-weight: 900; font-size: 1rem; text-transform: uppercase; margin-bottom: 6px; }
+    .biscoito-preco {
+        background: #ffcc00; border: 2px solid #000; border-radius: 8px;
+        font-weight: 900; font-size: 0.95rem; padding: 3px 10px;
+        display: inline-block; margin-bottom: 8px;
+    }
+    .biscoito-detalhe { font-size: 0.82rem; color: #555; font-weight: 600; margin-bottom: 10px; }
+    .biscoito-acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-edit {
+        background: #004a99; color: #ffcc00; border: 2px solid #000; border-radius: 8px;
+        font-weight: 800; font-size: 0.8rem; padding: 6px 12px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px; text-decoration: none;
+    }
+    .btn-edit:hover { background: #003370; color: #ffcc00; }
+
+    @media(max-width:600px) {
+        .receita-inner { flex-direction: column; }
+        .receita-foto { width: 100%; min-height: 160px; border-right: none; border-bottom: 4px solid #000; }
+        .emoji-ilustracao { font-size: 4rem; }
+        .gastos-tab-btn { font-size: 0.85rem !important; padding: 8px 14px !important; }
+    }
+</style>
+
+<div class="titulo-pagina">
+    <h2 class="page-title m-0"><i class="bi bi-journal-text me-2"></i>Receitas & Biscoitos</h2>
+</div>
+<div class="btn-voltar-linha">
+    <a href="{% url 'painel_home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+</div>
+
+<!-- ABAS -->
+<div class="gastos-tabs">
+    <button class="gastos-tab-btn {% if not edit_produto %}active{% endif %}" onclick="trocarAba('receitas', this)">
+        <i class="bi bi-book me-1"></i>Receitas
+    </button>
+    <button class="gastos-tab-btn {% if edit_produto %}active{% endif %}" onclick="trocarAba('biscoitos', this)">
+        <i class="bi bi-cookie me-1"></i>Biscoitos
+    </button>
+</div>
+
+<!-- ABA RECEITAS -->
+<div id="aba-receitas" class="gastos-tab-content {% if not edit_produto %}active{% endif %}">
+
+    <button class="btn-novo" onclick="document.getElementById('modalNovaReceita').classList.add('open')">
+        <i class="bi bi-plus-circle"></i> NOVA RECEITA
+    </button>
+    <div class="row g-4">
+        {% for receita in receitas %}
+        <div class="col-12 col-xl-6">
+            <div class="receita-card">
+                <div class="receita-inner">
+                    <div class="receita-foto">
+                        {% if receita.imagem %}
+                            <img src="{{ receita.imagem.url }}" alt="{{ receita.nome_receita }}">
+                        {% else %}
+                            <span class="emoji-ilustracao">🍪</span>
+                        {% endif %}
+                    </div>
+                    <div class="receita-conteudo">
+                        <div class="receita-nome">{{ receita.nome_receita }}</div>
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-cart3 me-1"></i>Ingredientes:</h6>
+                        <ul class="ingrediente-lista">
+                            {% for item in receita.ingredientes.all %}
+                            <li class="ingrediente-item">
+                                <span class="check-icon">●</span>
+                                <div>
+                                    <span class="qtd-tecnica">{{ item.qtd }}{{ item.insumo.und_medida }}</span>
+                                    de {{ item.insumo.nome_insumo }}
+                                    <span class="medida-caseira">({{ item.medida_caseira }})</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="receita-acoes">
+                    <a href="?editar_receita={{ receita.id_receita }}" class="btn-edit"><i class="bi bi-pencil"></i> Editar</a>
+                    <form method="POST" onsubmit="return confirm('Deletar {{ receita.nome_receita }}?')" style="display:inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="acao" value="delete_receita">
+                        <input type="hidden" name="id" value="{{ receita.id_receita }}">
+                        <button type="submit" class="btn-del-receita"><i class="bi bi-trash"></i> Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning border-dark text-center fw-bold py-5"><h3>NENHUMA RECEITA CADASTRADA.</h3></div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ABA BISCOITOS -->
+<div id="aba-biscoitos" class="gastos-tab-content {% if edit_produto %}active{% endif %}">
+    <button class="btn-novo" onclick="document.getElementById('modalBiscoito').classList.add('open')">
+        <i class="bi bi-plus-circle"></i> NOVO BISCOITO
+    </button>
+
+    <div class="row g-4">
+        {% for prod in produtos %}
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="biscoito-card">
+                <div class="biscoito-foto">
+                    {% if prod.imagem %}
+                        <img src="{{ prod.imagem.url }}" alt="{{ prod.nome_produto }}">
+                    {% else %}
+                        <span class="biscoito-emoji">🍪</span>
+                    {% endif %}
+                </div>
+                <div class="biscoito-info">
+                    <div class="biscoito-nome">{{ prod.nome_produto }}</div>
+                    <div class="biscoito-preco">R$ {{ prod.preco_unitario|floatformat:2 }}</div>
+                    <div class="biscoito-detalhe">
+                        <i class="bi bi-box me-1"></i>{{ prod.peso_cont }}{{ prod.und_medida }} &nbsp;|&nbsp;
+                        <i class="bi bi-stack me-1"></i>Estoque: {{ prod.qtd_disponivel }}
+                    </div>
+                    <div class="biscoito-acoes">
+                        <a href="?editar_produto={{ prod.id_produto }}" class="btn-edit"><i class="bi bi-pencil"></i> Editar</a>
+                        <form method="POST" onsubmit="return confirm('Remover {{ prod.nome_produto }}?')" style="display:inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="acao" value="delete_produto">
+                            <input type="hidden" name="id" value="{{ prod.id_produto }}">
+                            <button type="submit" class="btn-del-receita"><i class="bi bi-trash"></i> Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning border-dark text-center fw-bold py-5"><h3>NENHUM BISCOITO CADASTRADO.</h3></div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- MODAL NOVA RECEITA -->
+<div class="modal-despesa" id="modalNovaReceita">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-journal-plus me-2"></i>Nova Receita</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="add_receita">
+            <div class="modal-field">
+                <label>Nome da Receita</label>
+                <input type="text" name="nome_receita" placeholder="Ex: Biscoito Baunilha" required>
+            </div>
+            <div class="modal-field">
+                <label>Produto Gerado</label>
+                <select name="produto" required>
+                    <option value="">Selecione...</option>
+                    {% for p in produtos %}<option value="{{ p.id_produto }}">{{ p.nome_produto }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Imagem</label>
+                <input type="file" name="imagem" accept="image/*">
+            </div>
+            <hr><strong style="color:#004a99;text-transform:uppercase;font-size:.85rem">Ingredientes</strong>
+            <div id="ingredientes">
+                <div class="ing-bloco ing-linha">
+                    <div class="titulo-ing"><i class="bi bi-droplet"></i> Ingrediente</div>
+                    <div class="ing-grid">
+                        <div class="full">
+                            <label>Insumo</label>
+                            <select name="ing_insumo[]">
+                                {% for ins in insumos %}<option value="{{ ins.id_insumo }}">{{ ins.nome_insumo }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Quantidade</label>
+                            <input type="number" name="ing_qtd[]" placeholder="0">
+                        </div>
+                        <div>
+                            <label>Unidade</label>
+                            <select name="ing_und[]">
+                                <option>g</option><option>kg</option><option>ml</option><option>l</option><option>un</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Peso/Cont.</label>
+                            <input type="number" name="ing_peso[]" placeholder="0">
+                        </div>
+                        <div>
+                            <label>Medida Caseira</label>
+                            <input type="text" name="ing_medida[]" placeholder="Ex: xícaras">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addIng()" style="background:#ffcc00;border:2px solid #000;border-radius:8px;padding:8px 14px;font-weight:800;margin-top:12px;cursor:pointer;box-shadow:2px 2px 0 #000">
+                <i class="bi bi-plus-circle"></i> Mais ingrediente
+            </button>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR RECEITA</button>
+            <button type="button" class="btn-cancelar-despesa" onclick="document.getElementById('modalNovaReceita').classList.remove('open')"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDITAR RECEITA -->
+{% if edit_receita %}
+<div class="modal-despesa open" id="modalEditarReceita">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-pencil me-2"></i>Editar Receita</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="edit_receita">
+            <input type="hidden" name="id" value="{{ edit_receita.id_receita }}">
+            <div class="modal-field">
+                <label>Nome da Receita</label>
+                <input type="text" name="nome_receita" value="{{ edit_receita.nome_receita }}" required>
+            </div>
+            <div class="modal-field">
+                <label>Produto Gerado</label>
+                <select name="produto" required>
+                    <option value="">Selecione...</option>
+                    {% for p in produtos %}<option value="{{ p.id_produto }}" {% if edit_receita.produto_id == p.id_produto %}selected{% endif %}>{{ p.nome_produto }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Imagem (deixe vazio para manter)</label>
+                <input type="file" name="imagem" accept="image/*">
+            </div>
+            <hr><strong style="color:#004a99;text-transform:uppercase;font-size:.85rem">Ingredientes</strong>
+            <div id="ingredientes-edit">
+                {% for item in edit_receita.ingredientes.all %}
+                <div class="ing-bloco ing-linha-edit">
+                    <div class="titulo-ing"><i class="bi bi-droplet"></i> Ingrediente</div>
+                    <div class="ing-grid">
+                        <div class="full">
+                            <label>Insumo</label>
+                            <select name="ing_insumo[]">
+                                {% for ins in insumos %}<option value="{{ ins.id_insumo }}" {% if item.insumo_id == ins.id_insumo %}selected{% endif %}>{{ ins.nome_insumo }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div><label>Quantidade</label><input type="number" name="ing_qtd[]" value="{{ item.qtd }}"></div>
+                        <div>
+                            <label>Unidade</label>
+                            <select name="ing_und[]">
+                                <option {% if item.und_medida == 'g' %}selected{% endif %}>g</option>
+                                <option {% if item.und_medida == 'kg' %}selected{% endif %}>kg</option>
+                                <option {% if item.und_medida == 'ml' %}selected{% endif %}>ml</option>
+                                <option {% if item.und_medida == 'l' %}selected{% endif %}>l</option>
+                                <option {% if item.und_medida == 'un' %}selected{% endif %}>un</option>
+                            </select>
+                        </div>
+                        <div><label>Peso/Cont.</label><input type="number" name="ing_peso[]" value="{{ item.peso_cont }}"></div>
+                        <div><label>Medida Caseira</label><input type="text" name="ing_medida[]" value="{{ item.medida_caseira }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="addIngEdit()" style="background:#ffcc00;border:2px solid #000;border-radius:8px;padding:8px 14px;font-weight:800;margin-top:12px;cursor:pointer;box-shadow:2px 2px 0 #000">
+                <i class="bi bi-plus-circle"></i> Mais ingrediente
+            </button>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR ALTERAÇÕES</button>
+            <a href="{% url 'painel_receitas' %}" class="btn-cancelar-despesa" style="display:block;text-align:center;text-decoration:none;margin-top:10px">
+                <i class="bi bi-x-circle me-1"></i>CANCELAR
+            </a>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODAL BISCOITO (novo / editar) -->
+<div class="modal-despesa" id="modalBiscoito">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-cookie me-2"></i>{{ edit_produto|yesno:"Editar,Novo" }} Biscoito</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="{{ edit_produto|yesno:'edit_produto,add_produto' }}">
+            {% if edit_produto %}<input type="hidden" name="id" value="{{ edit_produto.id_produto }}">{% endif %}
+            <div class="modal-field">
+                <label>Nome do Biscoito</label>
+                <input type="text" name="nome_produto" value="{{ edit_produto.nome_produto|default:'' }}" placeholder="Ex: Biscoito de Mel" required>
+            </div>
+            <div class="modal-field">
+                <label>Preço Unitário (R$)</label>
+                <input type="number" name="preco_unitario" step="0.01" value="{{ edit_produto.preco_unitario|default:'' }}" placeholder="0,00" required>
+            </div>
+            <div class="modal-field">
+                <label>Peso / Conteúdo</label>
+                <input type="number" name="peso_cont" value="{{ edit_produto.peso_cont|default:'' }}" placeholder="Ex: 200" required>
+            </div>
+            <div class="modal-field">
+                <label>Unidade de Medida</label>
+                <select name="und_medida">
+                    <option value="g" {% if edit_produto.und_medida == 'g' %}selected{% endif %}>g</option>
+                    <option value="kg" {% if edit_produto.und_medida == 'kg' %}selected{% endif %}>kg</option>
+                    <option value="un" {% if edit_produto.und_medida == 'un' %}selected{% endif %}>un</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Quantidade em Estoque</label>
+                <input type="number" name="qtd_disponivel" value="{{ edit_produto.qtd_disponivel|default:'' }}" placeholder="0" required>
+            </div>
+            <div class="modal-field">
+                <label>Foto {% if edit_produto %}(deixe vazio para manter){% endif %}</label>
+                <input type="file" name="imagem" accept="image/*">
+            </div>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR</button>
+            <a href="{% url 'painel_receitas' %}" class="btn-cancelar-despesa" style="display:block;text-align:center;text-decoration:none;margin-top:10px">
+                <i class="bi bi-x-circle me-1"></i>CANCELAR
+            </a>
+        </form>
+    </div>
+</div>
+
+<script>
+function trocarAba(aba, btn) {
+    document.querySelectorAll('.gastos-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.gastos-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('aba-' + aba).classList.add('active');
+    btn.classList.add('active');
+}
+{% if edit_produto %}
+    document.getElementById('modalBiscoito').classList.add('open');
+{% endif %}
+{% if messages %}
+    trocarAba('biscoitos', document.querySelectorAll('.gastos-tab-btn')[1]);
+{% endif %}
+
+const modeloIng = document.querySelector('.ing-linha') ? document.querySelector('.ing-linha').outerHTML : '';
+function addIng() {
+    const div = document.createElement('div');
+    div.innerHTML = modeloIng;
+    const novo = div.firstElementChild;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn-remover-ing'; btn.textContent = '×';
+    btn.onclick = () => novo.remove();
+    novo.appendChild(btn);
+    document.getElementById('ingredientes').appendChild(novo);
+}
+
+const modeloIngEdit = document.querySelector('.ing-linha-edit') ? document.querySelector('.ing-linha-edit').outerHTML : modeloIng;
+function addIngEdit() {
+    const div = document.createElement('div');
+    div.innerHTML = modeloIngEdit || modeloIng;
+    const novo = div.firstElementChild;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn-remover-ing'; btn.textContent = '×';
+    btn.onclick = () => novo.remove();
+    novo.appendChild(btn);
+    const cont = document.getElementById('ingredientes-edit');
+    if (cont) cont.appendChild(novo);
+}
+</script>
+
+{% endblock %}

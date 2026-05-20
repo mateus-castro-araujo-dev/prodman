@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load emoji_tags %}
+{% block content %}
+
+<style>
+    .titulo-pagina { text-align: center; margin-bottom: 12px; }
+    .btn-voltar-linha { margin-bottom: 1.5rem; }
+    .btn-voltar-linha a {
+        background-color: #ffcc00; display: inline-block; font-weight: 800;
+        padding: 10px 20px; border-radius: 10px; text-decoration: none;
+        color: #000; border: 3px solid #000; box-shadow: 5px 5px 0px #000; font-size: 1rem;
+    }
+    .emoji-produto { font-size: 5rem; line-height: 1; filter: drop-shadow(2px 2px 0 #000); }
+    .produto-card {
+        border: 4px solid #000; border-radius: 20px; background: #fff;
+        overflow: hidden; box-shadow: 6px 6px 0px #e0e0e0; height: 100%;
+    }
+    .produto-img {
+        height: 140px; background: #f1f1f1; border-bottom: 4px solid #000;
+        display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .produto-img img { width: 100%; height: 100%; object-fit: cover; }
+    .produto-nome { font-weight: 800; font-size: 1rem; text-transform: uppercase; margin-bottom: 6px; }
+    .produto-preco {
+        background: #ffcc00; border: 3px solid #000; border-radius: 10px;
+        font-weight: 900; font-size: 1.3rem; padding: 4px 16px; margin-bottom: 10px;
+    }
+    .btn-add-venda {
+        background: #004a99; color: #ffcc00; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1rem; padding: 10px; width: 100%;
+        box-shadow: 0 4px 0 #002d5e; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-add-venda:hover { background: #003370; }
+    .carrinho-caixa {
+        position: sticky; top: 10px; border: 4px solid #000; border-radius: 20px;
+        background: #fff; padding: 20px; box-shadow: 8px 8px 0 #000;
+    }
+    .carrinho-caixa h3 { font-weight: 900; text-transform: uppercase; font-size: 1.2rem; margin-bottom: 16px; }
+    .carrinho-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px 0; border-bottom: 2px solid #eee; font-weight: 700;
+    }
+    .btn-remove-item {
+        background: #dc3545; color: #fff; border: 2px solid #000; border-radius: 6px;
+        font-weight: 800; padding: 3px 8px; cursor: pointer; font-size: 0.8rem;
+    }
+    .total-venda {
+        background: #ffcc00; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.4rem; padding: 8px 16px;
+        text-align: center; margin: 12px 0;
+    }
+    .btn-finalizar {
+        background: #28a745; color: #fff; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px; width: 100%;
+        box-shadow: 0 4px 0 #155724; cursor: pointer;
+    }
+    select.metodo-select {
+        width: 100%; border: 3px solid #000; border-radius: 10px;
+        padding: 10px; font-weight: 800; font-size: 1rem; margin-bottom: 12px;
+    }
+    @media(max-width:767px) {
+        .produto-img { height: 110px !important; }
+        .produto-nome { font-size: 0.9rem !important; }
+        .produto-preco { font-size: 1.1rem !important; }
+        .btn-add-venda { font-size: 0.85rem !important; padding: 8px !important; }
+        .carrinho-caixa { position: static !important; border-radius: 16px !important; padding: 14px !important; }
+    }
+</style>
+
+<div class="titulo-pagina">
+    <h2 class="page-title m-0"><i class="bi bi-bag-check me-2"></i>Nova Venda</h2>
+</div>
+<div class="btn-voltar-linha">
+    <a href="{% url 'painel_home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+</div>
+
+<form method="POST" id="formVenda">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="add_venda">
+    <input type="hidden" name="carrinho_json" id="carrinhoJson">
+    <div class="row g-3">
+        <!-- PRODUTOS -->
+        <div class="col-lg-8">
+            <div class="row g-3">
+                {% for p in produtos %}
+                <div class="col-6 col-md-4">
+                    <div class="produto-card text-center">
+                        <div class="produto-img">
+                            {% if p.imagem %}
+                                <img src="{{ p.imagem.url }}" alt="{{ p.nome_produto }}">
+                            {% else %}
+                                <div class="emoji-produto">{{ p.nome_produto|emoji_for }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="p-2">
+                            <div class="produto-nome">{{ p.nome_produto }}</div>
+                            <div class="produto-preco">R$ {{ p.preco_unitario }}</div>
+                            <button type="button" class="btn-add-venda"
+                                onclick="adicionarItem({{ p.id_produto }}, '{{ p.nome_produto }}', {{ p.preco_unitario }})">
+                                <i class="bi bi-plus-circle"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning border-dark fw-bold text-center">Nenhum produto cadastrado.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- CARRINHO -->
+        <div class="col-lg-4">
+            <div class="carrinho-caixa">
+                <h3><i class="bi bi-cart3 me-2"></i>Carrinho</h3>
+                <select name="metodo" class="metodo-select">
+                    <option value="DINHEIRO">💵 Dinheiro</option>
+                    <option value="PIX">📲 PIX</option>
+                </select>
+                <div id="carrinho-itens">
+                    <p style="color:#aaa;text-align:center;font-size:.9rem">Nenhum item adicionado</p>
+                </div>
+                <div class="total-venda">TOTAL: R$ <span id="totalVenda">0,00</span></div>
+                <button type="button" class="btn-finalizar" onclick="finalizarVenda()">
+                    <i class="bi bi-check2-circle me-1"></i> FINALIZAR VENDA
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+let carrinho = {};
+function adicionarItem(id, nome, preco) {
+    if (carrinho[id]) {
+        carrinho[id].qtd++;
+    } else {
+        carrinho[id] = { nome, preco: parseFloat(preco), qtd: 1 };
+    }
+    renderCarrinho();
+}
+function removerItem(id) {
+    delete carrinho[id];
+    renderCarrinho();
+}
+function renderCarrinho() {
+    const div = document.getElementById('carrinho-itens');
+    const ids = Object.keys(carrinho);
+    if (!ids.length) {
+        div.innerHTML = '<p style="color:#aaa;text-align:center;font-size:.9rem">Nenhum item adicionado</p>';
+        document.getElementById('totalVenda').textContent = '0,00';
+        return;
+    }
+    let html = '';
+    let total = 0;
+    ids.forEach(id => {
+        const it = carrinho[id];
+        const sub = it.preco * it.qtd;
+        total += sub;
+        html += `<div class="carrinho-item">
+            <span>${it.qtd}x ${it.nome}</span>
+            <span>R$ ${sub.toFixed(2).replace('.',',')}
+            <button type="button" class="btn-remove-item" onclick="removerItem(${id})">✕</button></span>
+        </div>`;
+    });
+    div.innerHTML = html;
+    document.getElementById('totalVenda').textContent = total.toFixed(2).replace('.',',');
+}
+function finalizarVenda() {
+    if (!Object.keys(carrinho).length) { alert('Adicione ao menos um produto.'); return; }
+    document.getElementById('carrinhoJson').value = JSON.stringify(carrinho);
+    document.getElementById('formVenda').submit();
+}
+</script>
+
+{% endblock %}

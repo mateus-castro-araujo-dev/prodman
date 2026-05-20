@@ -50,21 +50,21 @@
                 {% else %}
                     <div class="img-previa d-flex align-items-center justify-content-center text-muted fw-bold">SEM FOTO</div>
                 {% endif %}
-                
+
                 <div class="card-body p-4 text-center">
                     <h5 class="receita-titulo">{{ receita.nome_receita }}</h5>
                     <p class="text-muted fw-bold mb-3"><i class="bi bi-box-seam me-1"></i>Faz: {{ receita.produto.nome_produto }}</p>
-                    
+
                     <form method="POST">
                         {% csrf_token %}
                         <input type="hidden" name="receita_id" value="{{ receita.id_receita }}">
-                        
+
                         <label class="lote-label">Quantas vezes a receita?</label>
                         <div class="input-lote-container">
                             <span class="input-lote-texto">LOTES:</span>
                             <input type="number" name="qtd_batches" class="form-control input-lote-campo" value="1" min="1" required>
                         </div>
-                        
+
                         <button type="submit" class="btn btn-iniciar-grande w-100">
                             <i class="bi bi-fire me-1"></i>COMEÇAR AGORA
                         </button>

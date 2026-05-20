@@ -40,7 +40,8 @@
 
     .btn-acessivel img {
         width: 70px;
-        height: auto;
+        height: 70px;
+        object-fit: contain;
         margin-bottom: 15px;
     }
 
@@ -62,6 +63,7 @@
         }
         .btn-acessivel img {
             width: 55px;
+            height: 55px;
         }
         .btn-text {
             font-size: 1.1rem;
@@ -83,11 +85,11 @@
         /* Grid ocupa toda a altura disponível */
         .menu-grid {
             grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
             gap: 12px;
             margin-top: 8px;
             max-width: 100%;
             min-height: calc(100dvh - 130px);
-            align-content: stretch;
         }
 
         /* Botões crescem para preencher o espaço */
@@ -101,6 +103,7 @@
 
         .btn-acessivel img {
             width: 52px;
+            height: 52px;
             margin-bottom: 10px;
         }
 

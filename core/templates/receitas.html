@@ -3,29 +3,16 @@
 {% block content %}
 
 <style>
-    /* ── TÍTULO ── */
-    .titulo-pagina {
-        text-align: center;
-        margin-bottom: 12px;
+    /* ── ABAS ── */
+    .gastos-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 4px solid #000; }
+    .gastos-tab-btn {
+        background-color: #e9ecef; border: 4px solid #000; border-bottom: none;
+        border-radius: 15px 15px 0 0; font-weight: 800; font-size: 1.1rem;
+        text-transform: uppercase; padding: 10px 28px; cursor: pointer; color: #333;
     }
-
-    /* ── BOTÃO VOLTAR ── */
-    .btn-voltar-linha {
-        margin-bottom: 1.2rem;
-    }
-
-    .btn-voltar-linha a {
-        background-color: #ffcc00;
-        display: inline-block;
-        font-weight: 800;
-        padding: 10px 20px;
-        border-radius: 10px;
-        text-decoration: none;
-        color: #000;
-        border: 3px solid #000;
-        box-shadow: 5px 5px 0px #000;
-        font-size: 1rem;
-    }
+    .gastos-tab-btn.active { background-color: #ffcc00; color: #000; padding-bottom: 14px; }
+    .gastos-tab-content { display: none; }
+    .gastos-tab-content.active { display: block; }
 
     /* ── CARD DE RECEITA ── */
     .receita-card {
@@ -36,114 +23,100 @@
         height: 100%;
         box-shadow: 8px 8px 0px #eee;
     }
-
-    /* Desktop: imagem à esquerda, conteúdo à direita */
-    .receita-inner {
-        display: flex;
-        flex-direction: row;
-        height: 100%;
-    }
-
+    .receita-inner { display: flex; flex-direction: row; height: 100%; }
     .receita-foto {
-        width: 33%;
-        flex-shrink: 0;
-        background-color: #f1f1f1;
-        border-right: 4px solid #000;
+        width: 33%; flex-shrink: 0; background-color: #f1f1f1;
+        border-right: 4px solid #000; display: flex; align-items: center;
+        justify-content: center; min-height: 200px;
+    }
+    .receita-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .emoji-ilustracao { font-size: 6rem; line-height: 1; filter: drop-shadow(3px 3px 0 #000); }
+    .receita-conteudo { flex: 1; padding: 20px; }
+
+    /* ── CARD DE BISCOITO ── */
+    .biscoito-card {
+        border: 4px solid #000;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 6px 6px 0px #eee;
+        overflow: hidden;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 200px;
-    }
-
-    .receita-foto img {
-        width: 100%;
+        flex-direction: column;
         height: 100%;
-        object-fit: cover;
-        display: block;
+    }
+    .biscoito-foto {
+        width: 100%; height: 160px;
+        background: #f5f5f5;
+        border-bottom: 3px solid #000;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden;
+    }
+    .biscoito-foto img { width: 100%; height: 100%; object-fit: cover; }
+    .biscoito-emoji { font-size: 4rem; }
+    .biscoito-info { padding: 16px; flex: 1; }
+    .biscoito-nome { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 6px; }
+    .biscoito-preco {
+        background: #ffcc00; border: 2px solid #000; border-radius: 8px;
+        font-weight: 900; font-size: 1rem; padding: 4px 12px;
+        display: inline-block; margin-bottom: 8px;
+    }
+    .biscoito-detalhe { font-size: 0.85rem; color: #555; font-weight: 600; }
+
+    /* ── BOTÃO CADASTRAR ── */
+    .btn-cadastrar {
+        background-color: #004a99; color: #ffcc00; border: 3px solid #000;
+        border-radius: 12px; font-weight: 900; font-size: 1rem;
+        padding: 10px 22px; box-shadow: 4px 4px 0px #000; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-bottom: 20px; text-decoration: none;
+    }
+    .btn-cadastrar:hover { background: #003370; color: #ffcc00; }
+
+    /* ── MODAL ── */
+    .modal-custom {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.55); z-index: 1050;
+        align-items: center; justify-content: center;
+    }
+    .modal-custom.open { display: flex; }
+    .modal-custom-box {
+        background: #fff; border: 4px solid #000; border-radius: 20px;
+        padding: 30px; width: 100%; max-width: 500px;
+        box-shadow: 10px 10px 0px #000; margin: 20px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-custom-box h3 { font-weight: 900; text-transform: uppercase; margin-bottom: 20px; font-size: 1.2rem; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { font-weight: 800; text-transform: uppercase; color: #004a99; font-size: 0.85rem; display: block; margin-bottom: 5px; }
+    .modal-field input, .modal-field select {
+        width: 100%; border: 3px solid #000; border-radius: 10px;
+        padding: 9px 13px; font-size: 0.95rem; font-family: inherit; font-weight: 700;
+    }
+    .btn-salvar-modal {
+        background: #28a745; color: #fff; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1rem; padding: 11px; width: 100%;
+        box-shadow: 0 4px 0 #155724; cursor: pointer; margin-top: 8px;
+    }
+    .btn-cancelar-modal {
+        background: #e9ecef; color: #000; border: 3px solid #000; border-radius: 12px;
+        font-weight: 800; font-size: 0.95rem; padding: 9px; width: 100%; margin-top: 10px; cursor: pointer;
+    }
+    .btn-del-small {
+        background: #dc3545; color: #fff; border: 2px solid #000; border-radius: 8px;
+        font-weight: 800; font-size: 0.75rem; padding: 4px 10px; cursor: pointer; margin-top: 8px;
     }
 
-    .emoji-ilustracao {
-        font-size: 6rem;
-        line-height: 1;
-        filter: drop-shadow(3px 3px 0 #000);
-    }
     @media (max-width: 600px) {
+        .gastos-tab-btn { font-size: 0.85rem !important; padding: 8px 14px !important; }
+        .receita-inner { flex-direction: column !important; }
+        .receita-foto { width: 100% !important; height: 160px !important; min-height: unset !important; border-right: none !important; border-bottom: 3px solid #000 !important; overflow: hidden !important; }
         .emoji-ilustracao { font-size: 4.5rem; }
-    }
-
-    .receita-conteudo {
-        flex: 1;
-        padding: 20px;
-    }
-
-    /* ── CELULAR: imagem em cima, conteúdo embaixo ── */
-    @media (max-width: 600px) {
-        /* Cabeçalho: desfaz o position absolute no celular */
-        .position-relative.d-flex {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 10px !important;
-            min-height: unset !important;
-        }
-        .position-relative.d-flex .position-absolute {
-            position: static !important;
-            box-shadow: 3px 3px 0px #000 !important;
-        }
-        .position-relative.d-flex .position-absolute a {
-            font-size: 0.75rem !important;
-            padding: 6px 12px !important;
-        }
-        .position-relative.d-flex .page-title {
-            font-size: 1.8rem !important;
-            padding: 10px 20px !important;
-            align-self: center !important;
-        }
-
-        .scroll-container {
-            max-height: none !important;
-            overflow-y: visible !important;
-        }
-
-        .receita-inner {
-            flex-direction: column !important;
-        }
-
-        .receita-foto {
-            width: 100% !important;
-            height: 160px !important;
-            min-height: unset !important;
-            border-right: none !important;
-            border-bottom: 3px solid #000 !important;
-            overflow: hidden !important;
-        }
-
-        .receita-foto img {
-            height: 160px !important;
-            object-fit: cover !important;
-        }
-
-        .receita-conteudo {
-            padding: 14px !important;
-        }
-
-        .receita-nome {
-            font-size: 1.1rem !important;
-            margin-bottom: 8px !important;
-        }
-
-        .ingrediente-item {
-            font-size: 0.9rem !important;
-            padding: 6px 0 !important;
-        }
-
-        .qtd-tecnica { font-size: 0.85rem !important; }
-        .medida-caseira { font-size: 0.85rem !important; }
+        .receita-conteudo { padding: 14px !important; }
     }
 </style>
 
 <!-- CABEÇALHO -->
 <div class="d-flex align-items-center justify-content-center mb-4 position-relative" style="min-height: 60px;">
-    <h2 class="page-title m-0 text-center"><i class="bi bi-book me-2"></i>Livro de Receitas</h2>
+    <h2 class="page-title m-0 text-center"><i class="bi bi-book me-2"></i>Receitas & Biscoitos</h2>
     <div class="position-absolute start-0" style="box-shadow: 6px 6px 0px #000; border: 3px solid #000; border-radius: 12px;">
         <a href="{% url 'home' %}" style="background-color: #ffcc00;" class="btn fw-bold shadow-sm p-3 px-4">
             <i class="bi bi-arrow-left me-1"></i>VOLTAR
@@ -151,8 +124,18 @@
     </div>
 </div>
 
-<!-- RECEITAS: 2 colunas no desktop, 1 no celular -->
-<div class="scroll-container">
+<!-- ABAS -->
+<div class="gastos-tabs">
+    <button class="gastos-tab-btn active" onclick="trocarAba('receitas', this)">
+        <i class="bi bi-book me-1"></i>Receitas
+    </button>
+    <button class="gastos-tab-btn" onclick="trocarAba('biscoitos', this)">
+        <i class="bi bi-cookie me-1"></i>Biscoitos
+    </button>
+</div>
+
+<!-- ABA RECEITAS -->
+<div id="aba-receitas" class="gastos-tab-content active">
     <div class="row g-4">
         {% for receita in receitas %}
         <div class="col-12 col-xl-6">
@@ -193,5 +176,107 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- ABA BISCOITOS -->
+<div id="aba-biscoitos" class="gastos-tab-content">
+    {% if request.user.is_superuser %}
+    <button class="btn-cadastrar" onclick="document.getElementById('modalBiscoito').classList.add('open')">
+        <i class="bi bi-plus-circle"></i>CADASTRAR BISCOITO
+    </button>
+    {% endif %}
+
+    <div class="row g-4">
+        {% for produto in produtos %}
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="biscoito-card">
+                <div class="biscoito-foto">
+                    {% if produto.imagem %}
+                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome_produto }}">
+                    {% else %}
+                        <span class="biscoito-emoji">🍪</span>
+                    {% endif %}
+                </div>
+                <div class="biscoito-info">
+                    <div class="biscoito-nome">{{ produto.nome_produto }}</div>
+                    <div class="biscoito-preco">R$ {{ produto.preco_unitario|floatformat:2 }}</div>
+                    <div class="biscoito-detalhe">
+                        <i class="bi bi-box me-1"></i>{{ produto.peso_cont }}{{ produto.und_medida }} &nbsp;|&nbsp;
+                        <i class="bi bi-stack me-1"></i>Estoque: {{ produto.qtd_disponivel }}
+                    </div>
+                    {% if request.user.is_superuser %}
+                    <form method="POST" onsubmit="return confirm('Remover biscoito?')" class="mt-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="acao" value="delete_produto">
+                        <input type="hidden" name="id" value="{{ produto.id_produto }}">
+                        <button type="submit" class="btn-del-small"><i class="bi bi-trash me-1"></i>Remover</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="alert alert-warning border-dark fw-bold py-5">
+                <h3>NENHUM BISCOITO CADASTRADO.</h3>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- MODAL CADASTRAR BISCOITO -->
+<div class="modal-custom" id="modalBiscoito">
+    <div class="modal-custom-box">
+        <h3><i class="bi bi-cookie me-2"></i>Novo Biscoito</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="add_produto">
+            <div class="modal-field">
+                <label>Nome do Biscoito</label>
+                <input type="text" name="nome_produto" placeholder="Ex: Biscoito de Mel" required>
+            </div>
+            <div class="modal-field">
+                <label>Preço Unitário (R$)</label>
+                <input type="number" name="preco_unitario" step="0.01" placeholder="0,00" required>
+            </div>
+            <div class="modal-field">
+                <label>Peso / Conteúdo</label>
+                <input type="number" name="peso_cont" placeholder="Ex: 200" required>
+            </div>
+            <div class="modal-field">
+                <label>Unidade de Medida</label>
+                <select name="und_medida">
+                    <option value="g">g</option>
+                    <option value="kg">kg</option>
+                    <option value="un">un</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Quantidade em Estoque</label>
+                <input type="number" name="qtd_disponivel" placeholder="0" required>
+            </div>
+            <div class="modal-field">
+                <label>Foto (opcional)</label>
+                <input type="file" name="imagem" accept="image/*">
+            </div>
+            <button type="submit" class="btn-salvar-modal"><i class="bi bi-check2-circle me-1"></i>SALVAR</button>
+            <button type="button" class="btn-cancelar-modal" onclick="document.getElementById('modalBiscoito').classList.remove('open')">
+                <i class="bi bi-x-circle me-1"></i>CANCELAR
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function trocarAba(aba, btn) {
+    document.querySelectorAll('.gastos-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.gastos-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('aba-' + aba).classList.add('active');
+    btn.classList.add('active');
+}
+{% if messages %}
+    trocarAba('biscoitos', document.querySelectorAll('.gastos-tab-btn')[1]);
+{% endif %}
+</script>
 
 {% endblock %}

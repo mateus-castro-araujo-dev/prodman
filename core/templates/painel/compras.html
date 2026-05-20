@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .titulo-pagina { text-align: center; margin-bottom: 12px; }
+    .btn-voltar-linha { margin-bottom: 1.2rem; }
+    .btn-voltar-linha a {
+        background-color: #ffcc00; display: inline-block; font-weight: 800;
+        padding: 10px 20px; border-radius: 10px; text-decoration: none;
+        color: #000; border: 3px solid #000; box-shadow: 5px 5px 0px #000; font-size: 1rem;
+    }
+    .gastos-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 4px solid #000; }
+    .gastos-tab-btn {
+        background-color: #e9ecef; border: 4px solid #000; border-bottom: none;
+        border-radius: 15px 15px 0 0; font-weight: 800; font-size: 1.1rem;
+        text-transform: uppercase; padding: 10px 28px; cursor: pointer; color: #333;
+    }
+    .gastos-tab-btn.active { background-color: #ffcc00; color: #000; padding-bottom: 14px; }
+    .gastos-tab-content { display: none; }
+    .gastos-tab-content.active { display: block; }
+
+    .despesa-card {
+        border: 4px solid #000; border-radius: 16px; background-color: #fff;
+        margin-bottom: 12px; padding: 14px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 5px 5px 0px #e0e0e0; flex-wrap: wrap; gap: 8px;
+    }
+    .despesa-descricao { font-weight: 800; font-size: 1.1rem; color: #000; text-transform: uppercase; }
+    .despesa-data { font-size: 0.9rem; color: #555; font-weight: 600; }
+    .despesa-valor {
+        background-color: #dc3545; color: #fff; padding: 6px 18px;
+        border-radius: 10px; border: 2px solid #000; font-weight: 900; font-size: 1rem;
+    }
+    .despesa-acoes { display: flex; gap: 6px; align-items: center; }
+    .btn-del-small {
+        background: #dc3545; color: #fff; border: 2px solid #000; border-radius: 8px;
+        font-weight: 800; font-size: 0.8rem; padding: 5px 10px; cursor: pointer;
+    }
+
+    .modal-despesa {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.55); z-index: 1050;
+        align-items: center; justify-content: center;
+    }
+    .modal-despesa.open { display: flex; }
+    .modal-despesa-box {
+        background: #fff; border: 4px solid #000; border-radius: 20px;
+        padding: 30px; width: 100%; max-width: 520px;
+        box-shadow: 10px 10px 0px #000; margin: 20px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-despesa-box h3 { font-weight: 900; text-transform: uppercase; margin-bottom: 20px; font-size: 1.3rem; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { font-weight: 800; text-transform: uppercase; color: #004a99; font-size: 0.9rem; display: block; margin-bottom: 6px; }
+    .modal-field input, .modal-field select {
+        width: 100%; border: 3px solid #000; border-radius: 10px;
+        padding: 10px 14px; font-size: 1rem; font-family: inherit; font-weight: 700;
+    }
+    .btn-salvar-despesa {
+        background-color: #28a745; color: #fff; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px; width: 100%;
+        box-shadow: 0 4px 0 #155724; cursor: pointer; margin-top: 8px;
+    }
+    .btn-cancelar-despesa {
+        background-color: #e9ecef; color: #000; border: 3px solid #000; border-radius: 12px;
+        font-weight: 800; font-size: 1rem; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer;
+    }
+    .btn-nova-despesa {
+        background-color: #004a99; color: #ffcc00; border: 3px solid #000; border-radius: 12px;
+        font-weight: 900; font-size: 1.1rem; padding: 12px 24px;
+        box-shadow: 4px 4px 0px #000; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px;
+    }
+    /* ── ITEM DE COMPRA: card vertical dentro do modal ── */
+    .item-compra-bloco {
+        border: 2px solid #000;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 10px;
+        background: #fafafa;
+        position: relative;
+    }
+    .item-compra-bloco .titulo-item {
+        font-weight: 800;
+        color: #004a99;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+    .item-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .item-grid .full { grid-column: 1 / -1; }
+    .item-grid label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #555;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 3px;
+    }
+    .item-grid input, .item-grid select {
+        width: 100%;
+        border: 2px solid #000;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+    .btn-remover-item {
+        position: absolute;
+        top: 6px; right: 6px;
+        background: #dc3545; color: #fff;
+        border: 2px solid #000; border-radius: 6px;
+        width: 26px; height: 26px;
+        font-weight: 900; cursor: pointer;
+        line-height: 1; padding: 0;
+    }
+    .desconto-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+    @media(max-width:600px) {
+        .gastos-tab-btn { font-size: 0.85rem !important; padding: 8px 14px !important; }
+        .despesa-card { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<div class="titulo-pagina">
+    <h2 class="page-title m-0"><i class="bi bi-wallet2 me-2"></i>Gastos</h2>
+</div>
+<div class="btn-voltar-linha">
+    <a href="{% url 'painel_home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+</div>
+
+<div class="gastos-tabs">
+    <button class="gastos-tab-btn active" onclick="trocarAba('compras', this)">
+        <i class="bi bi-receipt me-1"></i>Compras
+    </button>
+    <button class="gastos-tab-btn" onclick="trocarAba('despesas', this)">
+        <i class="bi bi-cash-stack me-1"></i>Despesas
+    </button>
+</div>
+
+<!-- ABA COMPRAS -->
+<div id="aba-compras" class="gastos-tab-content active">
+    <button class="btn-nova-despesa" onclick="abrirModal('modalNovaCompra')">
+        <i class="bi bi-plus-circle"></i>NOVA COMPRA
+    </button>
+    <p style="font-size:0.82rem;color:#888;font-weight:600;margin-bottom:10px;margin-top:-8px;">
+        <i class="bi bi-info-circle me-1"></i>Exibindo as 10 compras mais recentes.
+    </p>
+    <div class="accordion" id="accordionCompras">
+        {% for compra in compras %}
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ compra.id_compra }}">
+                    <div class="compra-info d-flex gap-3 align-items-center w-100 flex-wrap">
+                        <span>
+                            <span class="badge-nf badge bg-dark text-white">NF: {{ compra.nota_fiscal }}</span>
+                            {% if compra.fornecedor %}<span class="badge bg-primary ms-1">{{ compra.fornecedor }}</span>{% endif %}
+                            <strong class="ms-2">{{ compra.data_nf|date:"d/m/Y" }}</strong>
+                        </span>
+                        <span class="ms-auto me-3 badge bg-warning text-dark border border-dark">TOTAL: R$ {{ compra.total_compra|floatformat:2 }}</span>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapse{{ compra.id_compra }}" class="accordion-collapse collapse">
+                <div class="accordion-body bg-white">
+                    <table class="table table-sm">
+                        <thead><tr><th>Insumo</th><th>Qtd</th><th>Preço Un.</th><th>Desconto</th><th>Subtotal</th></tr></thead>
+                        <tbody>
+                            {% for item in compra.itens.all %}
+                            <tr>
+                                <td>{{ item.insumo.nome_insumo }}</td>
+                                <td>{{ item.qtd_item_compra }} {{ item.und_medida }}</td>
+                                <td>R$ {{ item.preco_unitario|floatformat:2 }}</td>
+                                <td>
+                                    {% if item.desconto_percentual %}{{ item.desconto_percentual }}%{% endif %}
+                                    {% if item.desconto_valor %}{% if item.desconto_percentual %} + {% endif %}R$ {{ item.desconto_valor|floatformat:2 }}{% endif %}
+                                    {% if not item.desconto_percentual and not item.desconto_valor %}—{% endif %}
+                                </td>
+                                <td><strong>R$ {{ item.subtotal_com_desconto|floatformat:2 }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr><td colspan="4" class="text-end">Subtotal bruto:</td><td>R$ {{ compra.total_bruto|floatformat:2 }}</td></tr>
+                            <tr><td colspan="4" class="text-end text-danger">Total descontos:</td><td class="text-danger">- R$ {{ compra.total_descontos|floatformat:2 }}</td></tr>
+                            <tr class="fw-bold"><td colspan="4" class="text-end">TOTAL FINAL:</td><td>R$ {{ compra.total_compra|floatformat:2 }}</td></tr>
+                        </tfoot>
+                    </table>
+                    <form method="POST" onsubmit="return confirm('Deletar esta compra?')" class="mt-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="acao" value="delete_compra">
+                        <input type="hidden" name="id" value="{{ compra.id_compra }}">
+                        <button type="submit" class="btn-del-small"><i class="bi bi-trash me-1"></i>Deletar Compra</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-warning border-dark text-center fw-bold py-5"><h3>NENHUMA COMPRA REGISTRADA.</h3></div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ABA DESPESAS -->
+<div id="aba-despesas" class="gastos-tab-content">
+    <button class="btn-nova-despesa" onclick="abrirModal('modalNovaDespesa')">
+        <i class="bi bi-plus-circle"></i>NOVA DESPESA
+    </button>
+    <p style="font-size:0.82rem;color:#888;font-weight:600;margin-bottom:10px;margin-top:-8px;">
+        <i class="bi bi-info-circle me-1"></i>Exibindo as 10 despesas mais recentes.
+    </p>
+    {% for despesa in despesas %}
+    <div class="despesa-card">
+        <div>
+            <div class="despesa-descricao">{{ despesa.descricao }}</div>
+            <div class="despesa-data"><i class="bi bi-calendar3 me-1"></i>{{ despesa.data|date:"d/m/Y" }}</div>
+        </div>
+        <div class="despesa-acoes">
+            <div class="despesa-valor"><i class="bi bi-dash-circle me-1"></i>R$ {{ despesa.valor }}</div>
+            <form method="POST" onsubmit="return confirm('Deletar despesa?')">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="delete_despesa">
+                <input type="hidden" name="id" value="{{ despesa.id_despesa }}">
+                <button type="submit" class="btn-del-small"><i class="bi bi-trash"></i></button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-warning border-dark text-center fw-bold py-4"><h3>NENHUMA DESPESA REGISTRADA.</h3></div>
+    {% endfor %}
+</div>
+
+<!-- MODAL NOVA COMPRA -->
+<div class="modal-despesa" id="modalNovaCompra">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-receipt me-2"></i>Nova Compra</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="add_compra">
+            <div class="modal-field">
+                <label>Nota Fiscal</label>
+                <input type="text" name="nota_fiscal" placeholder="Ex: NF-001" required>
+            </div>
+            <div class="modal-field">
+                <label>Fornecedor</label>
+                <input type="text" name="fornecedor" placeholder="Ex: Atacadão, Sá Cavalcante...">
+            </div>
+            <div class="modal-field">
+                <label>Data</label>
+                <input type="date" name="data_nf" id="dataCompra">
+            </div>
+            <hr><strong style="color:#004a99;text-transform:uppercase;font-size:.9rem">Itens da Compra</strong>
+            <div id="itens-compra">
+                <div class="item-compra-bloco item-linha">
+                    <div class="titulo-item"><i class="bi bi-box"></i> Item</div>
+                    <div class="item-grid">
+                        <div class="full">
+                            <label>Insumo</label>
+                            <select name="insumo[]">
+                                {% for ins in insumos %}<option value="{{ ins.id_insumo }}">{{ ins.nome_insumo }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Quantidade</label>
+                            <input type="number" name="qtd_item[]" placeholder="0">
+                        </div>
+                        <div>
+                            <label>Unidade</label>
+                            <select name="und_item[]">
+                                <option>g</option><option>kg</option><option>ml</option><option>l</option><option>un</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Peso/Cont.</label>
+                            <input type="number" name="peso_cont[]" placeholder="0">
+                        </div>
+                        <div>
+                            <label>Preço Unit. (R$)</label>
+                            <input type="number" step="0.01" name="preco[]" placeholder="0,00">
+                        </div>
+                        <div class="full">
+                            <label>Desconto</label>
+                            <div class="desconto-row">
+                                <input type="number" step="0.01" name="desc_perc[]" placeholder="% desconto" value="0">
+                                <input type="number" step="0.01" name="desc_val[]" placeholder="R$ desconto" value="0">
+                            </div>
+                        </div>
+                        <div class="full">
+                            <label>Data de Validade (opcional)</label>
+                            <input type="date" name="validade[]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addItemCompra()" style="background:#ffcc00;border:2px solid #000;border-radius:8px;padding:8px 14px;font-weight:800;margin-top:12px;cursor:pointer;box-shadow:2px 2px 0 #000">
+                <i class="bi bi-plus-circle"></i> Mais item
+            </button>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR COMPRA</button>
+            <button type="button" class="btn-cancelar-despesa" onclick="fecharModal('modalNovaCompra')"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL NOVA DESPESA -->
+<div class="modal-despesa" id="modalNovaDespesa">
+    <div class="modal-despesa-box">
+        <h3><i class="bi bi-cash-stack me-2"></i>Nova Despesa</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="add_despesa">
+            <div class="modal-field">
+                <label>Descrição</label>
+                <input type="text" name="descricao" placeholder="Ex: Energia elétrica..." required>
+            </div>
+            <div class="modal-field">
+                <label>Valor (R$)</label>
+                <input type="number" name="valor" step="0.01" placeholder="0,00" required>
+            </div>
+            <div class="modal-field">
+                <label>Data</label>
+                <input type="date" name="data" id="dataHoje">
+            </div>
+            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR</button>
+            <button type="button" class="btn-cancelar-despesa" onclick="fecharModal('modalNovaDespesa')"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function trocarAba(aba, btn) {
+    document.querySelectorAll('.gastos-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.gastos-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('aba-' + aba).classList.add('active');
+    btn.classList.add('active');
+}
+function abrirModal(id) {
+    const hoje = new Date().toISOString().split('T')[0];
+    const d = document.getElementById('dataHoje'); if(d) d.value = hoje;
+    const dc = document.getElementById('dataCompra'); if(dc) dc.value = hoje;
+    document.getElementById(id).classList.add('open');
+}
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+const modeloItem = document.querySelector('.item-linha').outerHTML;
+function addItemCompra() {
+    const div = document.createElement('div');
+    div.innerHTML = modeloItem;
+    const novo = div.firstElementChild;
+    // adiciona botão remover
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-remover-item';
+    btn.textContent = '×';
+    btn.onclick = () => novo.remove();
+    novo.appendChild(btn);
+    document.getElementById('itens-compra').appendChild(novo);
+}
+{% if messages %}
+    trocarAba('despesas', document.querySelectorAll('.gastos-tab-btn')[1]);
+{% endif %}
+</script>
+
+{% endblock %}

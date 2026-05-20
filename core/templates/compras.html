@@ -97,104 +97,6 @@
         font-size: 1rem;
     }
 
-    /* ── MODAL ADICIONAR DESPESA ── */
-    .modal-despesa {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.55);
-        z-index: 1050;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-despesa.open {
-        display: flex;
-    }
-
-    .modal-despesa-box {
-        background: #fff;
-        border: 4px solid #000;
-        border-radius: 20px;
-        padding: 30px;
-        width: 100%;
-        max-width: 460px;
-        box-shadow: 10px 10px 0px #000;
-        margin: 20px;
-    }
-
-    .modal-despesa-box h3 {
-        font-weight: 900;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-        font-size: 1.3rem;
-    }
-
-    .modal-field {
-        margin-bottom: 16px;
-    }
-
-    .modal-field label {
-        font-weight: 800;
-        text-transform: uppercase;
-        color: #004a99;
-        font-size: 0.9rem;
-        display: block;
-        margin-bottom: 6px;
-    }
-
-    .modal-field input {
-        width: 100%;
-        border: 3px solid #000;
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-size: 1rem;
-        font-family: inherit;
-        font-weight: 700;
-    }
-
-    .btn-salvar-despesa {
-        background-color: #28a745;
-        color: #fff;
-        border: 3px solid #000;
-        border-radius: 12px;
-        font-weight: 900;
-        font-size: 1.1rem;
-        padding: 12px;
-        width: 100%;
-        box-shadow: 0 4px 0 #155724;
-        cursor: pointer;
-        margin-top: 8px;
-    }
-
-    .btn-cancelar-despesa {
-        background-color: #e9ecef;
-        color: #000;
-        border: 3px solid #000;
-        border-radius: 12px;
-        font-weight: 800;
-        font-size: 1rem;
-        padding: 10px;
-        width: 100%;
-        margin-top: 10px;
-        cursor: pointer;
-    }
-
-    .btn-nova-despesa {
-        background-color: #004a99;
-        color: #ffcc00;
-        border: 3px solid #000;
-        border-radius: 12px;
-        font-weight: 900;
-        font-size: 1.1rem;
-        padding: 12px 24px;
-        box-shadow: 4px 4px 0px #000;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 20px;
-    }
 
     @media (max-width: 600px) {
         .titulo-pagina .page-title { font-size: 1.4rem !important; padding: 10px 20px !important; }
@@ -288,10 +190,6 @@
 
 <!-- ABA DESPESAS -->
 <div id="aba-despesas" class="gastos-tab-content">
-    <button class="btn-nova-despesa" onclick="abrirModal()">
-        <i class="bi bi-plus-circle"></i>NOVA DESPESA
-    </button>
-
     {% for despesa in despesas %}
     <div class="despesa-card">
         <div>
@@ -307,30 +205,6 @@
     {% endfor %}
 </div>
 
-<!-- MODAL NOVA DESPESA -->
-<div class="modal-despesa" id="modalDespesa">
-    <div class="modal-despesa-box">
-        <h3><i class="bi bi-cash-stack me-2"></i>Nova Despesa</h3>
-        <form method="POST" action="{% url 'despesa_adicionar' %}">
-            {% csrf_token %}
-            <div class="modal-field">
-                <label>Descrição</label>
-                <input type="text" name="descricao" placeholder="Ex: Energia elétrica, aluguel..." required>
-            </div>
-            <div class="modal-field">
-                <label>Valor (R$)</label>
-                <input type="number" name="valor" step="0.01" min="0.01" placeholder="0,00" required>
-            </div>
-            <div class="modal-field">
-                <label>Data</label>
-                <input type="date" name="data" id="dataHoje">
-            </div>
-            <button type="submit" class="btn-salvar-despesa"><i class="bi bi-check2-circle me-1"></i>SALVAR</button>
-            <button type="button" class="btn-cancelar-despesa" onclick="fecharModal()"><i class="bi bi-x-circle me-1"></i>CANCELAR</button>
-        </form>
-    </div>
-</div>
-
 <script>
     function trocarAba(aba, btn) {
         document.querySelectorAll('.gastos-tab-content').forEach(el => el.classList.remove('active'));
@@ -338,20 +212,6 @@
         document.getElementById('aba-' + aba).classList.add('active');
         btn.classList.add('active');
     }
-
-    function abrirModal() {
-        document.getElementById('dataHoje').value = new Date().toISOString().split('T')[0];
-        document.getElementById('modalDespesa').classList.add('open');
-    }
-
-    function fecharModal() {
-        document.getElementById('modalDespesa').classList.remove('open');
-    }
-
-    // Abre aba despesas automaticamente se veio de um redirect após salvar
-    {% if messages %}
-        trocarAba('despesas', document.querySelectorAll('.gastos-tab-btn')[1]);
-    {% endif %}
 </script>
 
 {% endblock %}

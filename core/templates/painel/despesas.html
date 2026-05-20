@@ -1,0 +1,75 @@
+{% extends 'painel/base.html' %}
+{% block content %}
+<div class="painel-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="painel-title mb-0">
+            <span class="icone"><i class="bi bi-cash-stack"></i></span>
+            Despesas
+        </div>
+        <a href="{% url 'painel_home' %}" class="btn-apae"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+
+    <div class="form-section">
+        <h3>{{ edit_obj|yesno:"✏️ Editar Despesa,➕ Nova Despesa" }}</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="{{ edit_obj|yesno:'edit,add' }}_despesa">
+            {% if edit_obj %}<input type="hidden" name="id" value="{{ edit_obj.id_despesa }}">{% endif %}
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" name="descricao" class="form-control" value="{{ edit_obj.descricao|default:'' }}" required placeholder="Ex: Gás de cozinha">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" step="0.01" name="valor" class="form-control" value="{{ edit_obj.valor|default:'' }}" required placeholder="0,00">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" name="data" class="form-control" value="{{ edit_obj.data|date:'Y-m-d'|default:'' }}">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-apae mt-2">
+                <i class="bi bi-check-lg"></i> {{ edit_obj|yesno:"Salvar alterações,Adicionar Despesa" }}
+            </button>
+            {% if edit_obj %}
+            <a href="{% url 'painel_despesas' %}" class="btn-apae-blue mt-2" style="margin-left:8px">
+                <i class="bi bi-x"></i> Cancelar
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <table class="tabela mt-4">
+        <thead>
+            <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for d in despesas %}
+            <tr>
+                <td><strong>{{ d.descricao }}</strong></td>
+                <td>R$ {{ d.valor|floatformat:2 }}</td>
+                <td>{{ d.data|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="?editar={{ d.id_despesa }}" class="btn-apae-sm"><i class="bi bi-pencil"></i> Editar</a>
+                    <form method="POST" style="display:inline" onsubmit="return confirm('Deletar despesa?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="acao" value="delete_despesa">
+                        <input type="hidden" name="id" value="{{ d.id_despesa }}">
+                        <button type="submit" class="btn-apae-red"><i class="bi bi-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align:center;color:#888;padding:30px">Nenhuma despesa registrada</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

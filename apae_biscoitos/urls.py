@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from core import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
 
     path('', views.login_view),
     path('home/', views.home, name='home'),
@@ -40,6 +40,17 @@ urlpatterns = [
 
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+
+    # Painel Admin Customizado
+    path('admin/', views.painel_home, name='painel_home'),
+    path('admin/insumos/', views.painel_insumos, name='painel_insumos'),
+    path('admin/compras/', views.painel_compras, name='painel_compras'),
+    path('admin/receitas/', views.painel_receitas, name='painel_receitas'),
+    path('admin/vendas/', views.painel_vendas, name='painel_vendas'),
+    path('admin/despesas/', views.painel_despesas, name='painel_despesas'),
+    path('admin/usuarios/', views.painel_usuarios, name='painel_usuarios'),
+    path('admin/relatorios/', views.painel_relatorios, name='painel_relatorios'),
+    path('admin/producao/', views.painel_producao, name='painel_producao'),
 ]
 
 if settings.DEBUG:

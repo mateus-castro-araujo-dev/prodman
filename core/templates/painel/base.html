@@ -1,0 +1,287 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin — APAE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { font-family: 'Lexend', sans-serif; box-sizing: border-box; }
+
+        body { background-color: #004a99; min-height: 100vh; margin: 0; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background-color: #004a99;
+            padding: 14px 20px;
+            border-bottom: 3px solid #ffcc00;
+        }
+        .navbar-brand {
+            font-weight: 800; font-size: 1.3rem; color: #fff;
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none;
+        }
+        .navbar-brand img { height: 36px; }
+        .navbar-badge {
+            background: #ffcc00; color: #000;
+            font-size: 0.65rem; font-weight: 800;
+            padding: 2px 8px; border-radius: 20px;
+            border: 2px solid #000; letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .nav-back {
+            color: #ffcc00; font-weight: 700; text-decoration: none;
+            font-size: 0.95rem; display: flex; align-items: center; gap: 6px;
+        }
+        .nav-back:hover { color: #ffe066; }
+
+        /* ── CARD PRINCIPAL ── */
+        .painel-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 15px 35px rgba(0,0,0,.25);
+            margin-bottom: 24px;
+        }
+
+        .painel-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #004a99;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .painel-title .icone {
+            background: #004a99;
+            color: #ffcc00;
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        /* ── BOTÃO PADRÃO (amarelo) ── */
+        .btn-apae {
+            background-color: #ffcc00;
+            border: 3px solid #000;
+            border-radius: 12px;
+            color: #000;
+            font-weight: 800;
+            padding: 10px 20px;
+            box-shadow: 4px 4px 0px #000;
+            transition: transform .15s, box-shadow .15s;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        .btn-apae:hover { background: #ffe066; color: #000; transform: translateY(-2px); box-shadow: 4px 6px 0px #000; }
+        .btn-apae:active { transform: translateY(2px); box-shadow: 2px 2px 0px #000; }
+
+        /* ── BOTÃO AZUL ── */
+        .btn-apae-blue {
+            background-color: #004a99;
+            border: 3px solid #000;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 800;
+            padding: 10px 20px;
+            box-shadow: 4px 4px 0px #000;
+            transition: transform .15s, box-shadow .15s;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        .btn-apae-blue:hover { background: #003370; color: #fff; transform: translateY(-2px); box-shadow: 4px 6px 0px #000; }
+
+        /* ── BOTÃO VERMELHO ── */
+        .btn-apae-red {
+            background-color: #e53935;
+            border: 3px solid #000;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 800;
+            padding: 7px 14px;
+            box-shadow: 3px 3px 0px #000;
+            transition: transform .15s;
+            cursor: pointer;
+            font-size: 0.82rem;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .btn-apae-red:hover { background: #b71c1c; color: #fff; transform: translateY(-1px); }
+
+        /* ── BOTÃO VERDE PEQUENO ── */
+        .btn-apae-sm {
+            background-color: #ffcc00;
+            border: 2px solid #000;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 700;
+            padding: 5px 12px;
+            box-shadow: 2px 2px 0px #000;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .btn-apae-sm:hover { background: #ffe066; color: #000; }
+
+        /* ── TABELA ── */
+        .tabela {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 3px solid #000;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .tabela thead th {
+            background: #004a99;
+            color: #ffcc00;
+            font-weight: 800;
+            padding: 12px 16px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+        }
+        .tabela tbody tr:nth-child(even) { background: #f5f8ff; }
+        .tabela tbody tr:hover { background: #eef3ff; }
+        .tabela tbody td {
+            padding: 11px 16px;
+            border-bottom: 1px solid #e0e8f4;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+        .tabela tbody tr:last-child td { border-bottom: none; }
+
+        /* ── FORMULÁRIO ── */
+        .form-section {
+            background: #f5f8ff;
+            border: 3px solid #000;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+        .form-section h3 {
+            font-weight: 800; font-size: 1rem;
+            color: #004a99; margin-bottom: 16px;
+        }
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            font-weight: 700; font-size: 0.85rem;
+            color: #333; margin-bottom: 4px; display: block;
+        }
+        .form-control {
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: border-color .2s;
+        }
+        .form-control:focus { border-color: #004a99; outline: none; box-shadow: 0 0 0 3px rgba(0,74,153,.15); }
+
+        /* ── IMAGEM MINIATURA ── */
+        .thumb {
+            width: 48px; height: 48px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #000;
+        }
+        .sem-img {
+            width: 48px; height: 48px;
+            background: #e0e8f4;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        /* ── BADGE ── */
+        .badge-apae {
+            background: #ffcc00; color: #000;
+            font-weight: 800; font-size: 0.72rem;
+            padding: 3px 10px; border-radius: 20px;
+            border: 2px solid #000;
+        }
+
+        /* ── ALERTA ── */
+        .alerta { border-radius: 10px; padding: 10px 16px; margin-bottom: 16px; font-weight: 600; font-size: 0.9rem; }
+        .alerta-ok { background: #e8f5e9; border: 2px solid #4caf50; color: #1b5e20; }
+        .alerta-erro { background: #fde8e8; border: 2px solid #e53935; color: #b71c1c; }
+
+        /* ── GRID PAINEL INICIAL ── */
+        .painel-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .painel-btn {
+            background: #ffcc00;
+            border: 4px solid #000;
+            border-radius: 18px;
+            box-shadow: 0 6px 0px #b28f00;
+            color: #000;
+            text-decoration: none;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 28px 16px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            transition: transform .15s, box-shadow .15s;
+            gap: 10px;
+            letter-spacing: .5px;
+        }
+        .painel-btn i { font-size: 2rem; }
+        .painel-btn:hover { background: #ffe066; color: #000; transform: translateY(-3px); box-shadow: 0 9px 0px #b28f00; }
+        .painel-btn:active { transform: translateY(3px); box-shadow: 0 3px 0px #b28f00; }
+
+        @media(max-width: 768px) {
+            .painel-grid { grid-template-columns: repeat(2, 1fr); }
+            .painel-card { padding: 20px; }
+        }
+        @media(max-width: 480px) {
+            .painel-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="{% url 'painel_home' %}">
+        <img src="{% static 'icons/divertido.png' %}" alt="">
+        APAE <span class="navbar-badge">Admin</span>
+    </a>
+    <a href="{% url 'home' %}" class="nav-back">
+        <i class="bi bi-arrow-left-circle"></i> Sair do Painel
+    </a>
+</nav>
+
+<div class="container py-4">
+    {% if messages %}
+        {% for msg in messages %}
+        <div class="alerta {% if msg.tags == 'error' %}alerta-erro{% else %}alerta-ok{% endif %}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

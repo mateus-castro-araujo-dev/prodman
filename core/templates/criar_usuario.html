@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Usuário</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #004a99;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topo {
+            text-align: center;
+            color: white;
+            padding: 50px 20px 30px;
+        }
+
+        .logo-topo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.2));
+        }
+
+        .topo h1 {
+            margin: 0;
+            font-size: 36px;
+            letter-spacing: 1px;
+            font-weight: 800;
+        }
+
+        .topo p {
+            margin-top: 5px;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 450px;
+            width: 90%;
+            margin: 0 auto 50px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        h3 {
+            color: #555;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 6px;
+            margin-top: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 2px solid #eee;
+            outline: none;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: #004a99; background: #f9f9f9; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            background: #004a99;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #003366; transform: scale(1.02); }
+
+        .voltar {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #004a99;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .voltar:hover { text-decoration: underline; }
+
+        .mensagens { margin-bottom: 10px; }
+
+        .msg-erro {
+            background: #fde8e8;
+            color: #dc3545;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .msg-ok {
+            background: #e8f5e9;
+            color: #28a745;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topo">
+    <img src="{% static 'icons/divertido.png' %}" alt="Logo" class="logo-topo">
+    <h1>APAE</h1>
+    <p>Sistema de Biscoitos</p>
+</div>
+
+<div class="container">
+    <h3>Criar Novo Usuário</h3>
+
+    {% if messages %}
+    <div class="mensagens">
+        {% for msg in messages %}
+            <div class="{% if msg.tags == 'error' %}msg-erro{% else %}msg-ok{% endif %}">
+                {{ msg }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <label>Nome de usuário</label>
+        <input type="text" name="username" placeholder="Digite o nome de usuário" required autofocus>
+
+        <label>Senha</label>
+        <input type="password" name="password" placeholder="Digite a senha">
+
+        <label>Confirmar senha</label>
+        <input type="password" name="confirm" placeholder="Confirme a senha">
+
+        <button type="submit">Criar Usuário</button>
+    </form>
+
+    <a href="{% url 'login' %}" class="voltar">← Voltar para o login</a>
+</div>
+
+</body>
+</html>

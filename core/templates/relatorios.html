@@ -11,7 +11,7 @@
         color: #000; border: 3px solid #000; box-shadow: 5px 5px 0px #000;
     }
 
-    /* ── NOVOS CARDS FINANCEIROS ── */
+    /* ── CARDS FINANCEIROS ── */
     .resumo-financeiro {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -27,15 +27,24 @@
         text-align: center;
     }
 
-    .card-faturamento { background-color: #e0f7fa; }
-    .card-custos { background-color: #fff3e0; }
-    .card-perdas { background-color: #ffebee; color: #c62828; }
-    .card-lucro { background-color: #e8f5e9; color: #2e7d32; }
-
     .card-financeiro h3 { font-weight: 900; margin: 0; font-size: 1.4rem; }
     .card-financeiro span { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
 
-    /* Estilos das tabelas e abas (seus estilos originais) */
+    .card-faturamento { background-color: #0077cc; color: #fff; }
+    .card-custos      { background-color: #ff8c00; color: #fff; }
+    .card-despesas    { background-color: #cc0055; color: #fff; }
+    .card-lucro-pos   { background-color: #1a9e3f; color: #fff; }
+    .card-lucro-neg   { background-color: #cc2200; color: #fff; }
+
+    .btn-filtro-rapido {
+        background: #004a99; color: #fff; border: 3px solid #000;
+        border-radius: 10px; font-weight: 800; font-size: 0.9rem;
+        padding: 8px 18px; box-shadow: 3px 3px 0px #000;
+        cursor: pointer; transition: transform .1s, box-shadow .1s;
+    }
+    .btn-filtro-rapido:hover { background: #003370; transform: translateY(-2px); box-shadow: 3px 5px 0px #000; }
+    .btn-filtro-rapido:active { transform: translateY(1px); box-shadow: 2px 2px 0px #000; }
+
     .filtro-container { background: #f8f9fa; padding: 20px; border: 3px solid #000; border-radius: 12px; margin-bottom: 20px; }
     .btn-buscar { background: #000; color: #fff; font-weight: 800; border: none; border-radius: 8px; }
     
@@ -90,18 +99,28 @@
 </div>
 
 <div class="btn-voltar-linha">
-    <a href="{% url 'home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+    {% if from_admin %}
+        <a href="{% url 'painel_home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+    {% else %}
+        <a href="{% url 'home' %}"><i class="bi bi-arrow-left me-1"></i>VOLTAR</a>
+    {% endif %}
+</div>
+
+<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;justify-content:flex-end;">
+    <button type="button" onclick="filtroRapido('hoje')" class="btn-filtro-rapido"><i class="bi bi-sun me-1"></i>Hoje</button>
+    <button type="button" onclick="filtroRapido('semana')" class="btn-filtro-rapido"><i class="bi bi-calendar-week me-1"></i>Essa Semana</button>
+    <button type="button" onclick="filtroRapido('mes')" class="btn-filtro-rapido"><i class="bi bi-calendar-month me-1"></i>Esse Mês</button>
 </div>
 
 <div class="filtro-container">
     <form method="GET" class="row g-3">
         <div class="col-md-4">
             <label class="form-label"><i class="bi bi-calendar3 me-1"></i>Início</label>
-            <input type="date" name="data_inicio" id="data_inicio" class="form-control form-control-lg" required value="{{ request.GET.data_inicio }}">
+            <input type="date" name="data_inicio" id="data_inicio" class="form-control form-control-lg" required value="{{ data_inicio }}">
         </div>
         <div class="col-md-4">
             <label class="form-label"><i class="bi bi-calendar3 me-1"></i>Fim</label>
-            <input type="date" name="data_fim" id="data_fim" class="form-control form-control-lg" required value="{{ request.GET.data_fim }}">
+            <input type="date" name="data_fim" id="data_fim" class="form-control form-control-lg" required value="{{ data_fim }}">
         </div>
         <div class="col-md-4 d-grid">
             <label class="form-label d-none d-md-block">&nbsp;</label>
@@ -110,18 +129,6 @@
     </form>
 </div>
 
-<script>
-    // Preenche data de hoje se os campos estiverem vazios
-    (function() {
-        const hoje = new Date().toISOString().split('T')[0];
-        const inicio = document.getElementById('data_inicio');
-        const fim = document.getElementById('data_fim');
-        if (!inicio.value) inicio.value = hoje;
-        if (!fim.value) fim.value = hoje;
-    })();
-</script>
-
-{% if faturamento or custos or despesas_total or perdas %}
 <div class="resumo-financeiro">
     <div class="card-financeiro card-faturamento">
         <span><i class="bi bi-cash-coin me-1"></i>Faturamento</span>
@@ -131,16 +138,37 @@
         <span><i class="bi bi-graph-down-arrow me-1"></i>Custos (Insumos)</span>
         <h3>R$ {{ custos|floatformat:2 }}</h3>
     </div>
-    <div class="card-financeiro" style="background-color:#fce4ec; border:3px solid #000; border-radius:12px; box-shadow:5px 5px 0px #000; text-align:center; padding:15px;">
+    <div class="card-financeiro card-despesas">
         <span><i class="bi bi-wallet2 me-1"></i>Despesas</span>
-        <h3 style="color:#c62828;">R$ {{ despesas_total|floatformat:2 }}</h3>
+        <h3>R$ {{ despesas_total|floatformat:2 }}</h3>
     </div>
-<div class="card-financeiro card-lucro" style="background-color: {% if lucro >= 0 %}#e8f5e9{% else %}#ffebee{% endif %};">
+    <div class="card-financeiro {% if lucro >= 0 %}card-lucro-pos{% else %}card-lucro-neg{% endif %}">
         <span><i class="bi bi-gem me-1"></i>Lucro Líquido</span>
         <h3>R$ {{ lucro|floatformat:2 }}</h3>
     </div>
 </div>
-{% endif %}
+
+<div style="display:flex;justify-content:flex-end;margin-top:36px;margin-bottom:-18px;">
+    <button type="button" id="btnGrafico" onclick="toggleGrafico()" style="background:#004a99;color:#fff;border:4px solid #000;border-radius:14px;font-weight:900;font-size:1.25rem;padding:16px 40px;box-shadow:6px 6px 0 #000;cursor:pointer;display:inline-flex;align-items:center;gap:10px;transition:transform .1s,box-shadow .1s;">
+        <i class="bi bi-bar-chart-line" style="font-size:1.4rem;"></i> Ver Gráficos
+    </button>
+</div>
+
+<div id="secao-grafico" style="display:none;background:#fff;border:3px solid #000;border-radius:14px;padding:24px;margin-top:52px;margin-bottom:24px;box-shadow:5px 5px 0 #000;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h5 style="font-weight:800;margin:0;"><i class="bi bi-bar-chart-line me-2"></i>Desempenho por Período</h5>
+        <div style="display:flex;gap:8px;">
+            <button id="btnMensal" onclick="trocarVista('mensal')" style="background:#004a99;color:#fff;border:3px solid #000;border-radius:10px;font-weight:800;font-size:0.9rem;padding:8px 20px;box-shadow:3px 3px 0 #000;cursor:pointer;">
+                <i class="bi bi-calendar-month me-1"></i>Mensal
+            </button>
+            <button id="btnAnual" onclick="trocarVista('anual')" style="background:#e9ecef;color:#000;border:3px solid #000;border-radius:10px;font-weight:800;font-size:0.9rem;padding:8px 20px;box-shadow:3px 3px 0 #000;cursor:pointer;">
+                <i class="bi bi-calendar me-1"></i>Anual
+            </button>
+        </div>
+    </div>
+    <canvas id="graficoPrincipal" style="max-height:380px;"></canvas>
+</div>
+
 
 <ul class="nav nav-tabs d-flex" id="relatorioTab" role="tablist">
     <li class="nav-item" role="presentation">
@@ -244,5 +272,117 @@
         {% endif %}
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const _chartMensal = {{ chart_mensal|safe }};
+const _chartAnual  = {{ chart_anual|safe }};
+let _graficoInst   = null;
+let _vistaAtual    = 'mensal';
+
+function toggleGrafico() {
+    const sec = document.getElementById('secao-grafico');
+    const btn = document.getElementById('btnGrafico');
+    const visivel = sec.style.display !== 'none';
+    sec.style.display = visivel ? 'none' : 'block';
+    btn.innerHTML = visivel
+        ? '<i class="bi bi-bar-chart-line"></i> Ver Gráficos'
+        : '<i class="bi bi-eye-slash"></i> Esconder Gráficos';
+    if (!visivel && !_graficoInst) renderGrafico(_chartMensal);
+}
+
+function trocarVista(vista) {
+    _vistaAtual = vista;
+    document.getElementById('btnMensal').style.background = vista === 'mensal' ? '#004a99' : '#e9ecef';
+    document.getElementById('btnMensal').style.color      = vista === 'mensal' ? '#fff'    : '#000';
+    document.getElementById('btnAnual').style.background  = vista === 'anual'  ? '#004a99' : '#e9ecef';
+    document.getElementById('btnAnual').style.color       = vista === 'anual'  ? '#fff'    : '#000';
+    const dados = vista === 'mensal' ? _chartMensal : _chartAnual;
+    if (_graficoInst) {
+        _graficoInst.data.labels = dados.labels;
+        _graficoInst.data.datasets[0].data = dados.faturamento;
+        _graficoInst.data.datasets[1].data = dados.lucro;
+        _graficoInst.data.datasets[1].backgroundColor = dados.lucro.map(v => v >= 0 ? 'rgba(26,158,63,0.85)' : 'rgba(204,34,0,0.85)');
+        _graficoInst.data.datasets[1].borderColor      = dados.lucro.map(v => v >= 0 ? '#1a9e3f' : '#cc2200');
+        _graficoInst.data.datasets[2].data = dados.custos;
+        _graficoInst.data.datasets[3].data = dados.despesas;
+        _graficoInst.update();
+    } else {
+        renderGrafico(dados);
+    }
+}
+
+function renderGrafico(dados) {
+    const ctx = document.getElementById('graficoPrincipal').getContext('2d');
+    _graficoInst = new Chart(ctx, {
+        data: {
+            labels: dados.labels,
+            datasets: [
+                {
+                    type: 'bar', label: 'Faturamento',
+                    data: dados.faturamento,
+                    backgroundColor: 'rgba(0,119,204,0.85)', borderColor: '#0077cc',
+                    borderWidth: 2, borderRadius: 6, order: 2,
+                },
+                {
+                    type: 'bar', label: 'Lucro Líquido',
+                    data: dados.lucro,
+                    backgroundColor: dados.lucro.map(v => v >= 0 ? 'rgba(26,158,63,0.85)' : 'rgba(204,34,0,0.85)'),
+                    borderColor:     dados.lucro.map(v => v >= 0 ? '#1a9e3f' : '#cc2200'),
+                    borderWidth: 2, borderRadius: 6, order: 2,
+                },
+                {
+                    type: 'line', label: 'Custos (Insumos)',
+                    data: dados.custos,
+                    borderColor: '#ff8c00', backgroundColor: 'rgba(255,140,0,0.12)',
+                    borderWidth: 2.5, pointRadius: 4, tension: 0.3, fill: false, order: 1,
+                },
+                {
+                    type: 'line', label: 'Despesas',
+                    data: dados.despesas,
+                    borderColor: '#cc0055', backgroundColor: 'rgba(204,0,85,0.10)',
+                    borderWidth: 2.5, pointRadius: 4, tension: 0.3, fill: false, order: 1,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', labels: { font: { weight: '700' } } },
+                tooltip: { callbacks: { label: c => ` ${c.dataset.label}: R$ ${c.parsed.y.toFixed(2)}` } }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { weight: '600' }, maxRotation: 45 } },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.06)' },
+                    ticks: { font: { weight: '600' }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }
+                }
+            }
+        }
+    });
+}
+
+function filtroRapido(tipo) {
+    const hoje = new Date();
+    let inicio, fim;
+    fim = hoje.toISOString().split('T')[0];
+
+    if (tipo === 'hoje') {
+        inicio = fim;
+    } else if (tipo === 'semana') {
+        const d = new Date(hoje);
+        d.setDate(hoje.getDate() - hoje.getDay() + (hoje.getDay() === 0 ? -6 : 1));
+        inicio = d.toISOString().split('T')[0];
+    } else if (tipo === 'mes') {
+        inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+    }
+
+    document.getElementById('data_inicio').value = inicio;
+    document.getElementById('data_fim').value = fim;
+    document.getElementById('data_inicio').closest('form').submit();
+}
+</script>
 
 {% endblock %}
