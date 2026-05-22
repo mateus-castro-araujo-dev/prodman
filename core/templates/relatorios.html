@@ -49,64 +49,61 @@
     .btn-buscar { background: #000; color: #fff; font-weight: 800; border: none; border-radius: 8px; }
     
     @media (max-width: 600px) {
-        .resumo-financeiro { grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card-financeiro { padding: 10px; }
+        /* Cards financeiros 2 colunas */
+        .resumo-financeiro { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .card-financeiro { padding: 10px 8px; }
         .card-financeiro h3 { font-size: 1rem; }
-        .card-financeiro span { font-size: 0.72rem; }
+        .card-financeiro span { font-size: 0.68rem; }
 
-        /* Botões filtro rápido em linha compacta */
+        /* Botões filtro rápido: empilhar em coluna */
+        .div-filtros-rapidos {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+        }
         .btn-filtro-rapido {
-            font-size: 0.78rem !important;
-            padding: 6px 10px !important;
+            font-size: 0.9rem !important;
+            padding: 10px 14px !important;
+            width: 100% !important;
+            text-align: center !important;
             box-shadow: 2px 2px 0px #000 !important;
         }
 
-        /* Botão Ver Gráficos menor */
+        /* Botão Ver Gráficos full width */
+        .div-btn-grafico {
+            justify-content: stretch !important;
+            margin-top: 20px !important;
+            margin-bottom: 0 !important;
+        }
         #btnGrafico {
             font-size: 1rem !important;
             padding: 12px 20px !important;
             width: 100% !important;
             justify-content: center !important;
+            box-shadow: 4px 4px 0 #000 !important;
         }
 
-        /* Abas menores no mobile */
+        /* Abas: scrolar horizontalmente se necessário */
+        #relatorioTab { flex-wrap: nowrap !important; overflow-x: auto; }
         .nav-link {
             font-size: 0.78rem !important;
-            padding: 7px 10px !important;
-            border-radius: 10px 10px 0 0 !important;
+            padding: 7px 12px !important;
+            white-space: nowrap !important;
         }
 
         /* Filtros em coluna única */
-        .filtro-container { padding: 14px !important; }
+        .filtro-container { padding: 12px !important; }
         .filtro-container .col-md-4 { width: 100% !important; }
+        .btn-buscar { width: 100% !important; padding: 12px !important; font-size: 1rem !important; margin-top: 4px; }
 
-        .btn-buscar {
-            width: 100%;
-            padding: 12px;
-            font-size: 1rem;
-            margin-top: 4px;
-        }
-
-        .btn-voltar-linha a {
-            font-size: 0.75rem !important;
-            padding: 6px 12px !important;
-            box-shadow: 3px 3px 0px #000 !important;
-            border-width: 2px !important;
-        }
-
-        .titulo-pagina .page-title {
-            font-size: 1.2rem !important;
-            padding: 8px 14px !important;
-        }
-
-        /* Tabelas responsivas */
+        /* Tabelas */
         .table-responsive { overflow-x: auto; }
         .table-acessivel { font-size: 0.75rem !important; }
         .table-acessivel thead th,
-        .table-acessivel tbody td { padding: 5px 3px !important; }
+        .table-acessivel tbody td { padding: 5px 4px !important; }
 
         /* Seção gráfico */
-        #secao-grafico { padding: 14px !important; margin-top: 30px !important; }
+        #secao-grafico { padding: 12px !important; margin-top: 20px !important; }
     }
 </style>
 
@@ -122,7 +119,7 @@
     {% endif %}
 </div>
 
-<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;justify-content:flex-end;">
+<div class="div-filtros-rapidos" style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;justify-content:flex-end;">
     <button type="button" onclick="filtroRapido('hoje')" class="btn-filtro-rapido"><i class="bi bi-sun me-1"></i>Hoje</button>
     <button type="button" onclick="filtroRapido('semana')" class="btn-filtro-rapido"><i class="bi bi-calendar-week me-1"></i>Essa Semana</button>
     <button type="button" onclick="filtroRapido('mes')" class="btn-filtro-rapido"><i class="bi bi-calendar-month me-1"></i>Esse Mês</button>
@@ -164,7 +161,7 @@
     </div>
 </div>
 
-<div style="display:flex;justify-content:flex-end;margin-top:36px;margin-bottom:-18px;">
+<div class="div-btn-grafico" style="display:flex;justify-content:flex-end;margin-top:36px;margin-bottom:-18px;">
     <button type="button" id="btnGrafico" onclick="toggleGrafico()" style="background:#004a99;color:#fff;border:4px solid #000;border-radius:14px;font-weight:900;font-size:1.25rem;padding:16px 40px;box-shadow:6px 6px 0 #000;cursor:pointer;display:inline-flex;align-items:center;gap:10px;transition:transform .1s,box-shadow .1s;">
         <i class="bi bi-bar-chart-line" style="font-size:1.4rem;"></i> Ver Gráficos
     </button>
