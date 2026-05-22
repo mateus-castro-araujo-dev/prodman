@@ -49,26 +49,42 @@
     .btn-buscar { background: #000; color: #fff; font-weight: 800; border: none; border-radius: 8px; }
     
     @media (max-width: 600px) {
-        .resumo-financeiro { grid-template-columns: 1fr 1fr; }
+        .resumo-financeiro { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card-financeiro { padding: 10px; }
+        .card-financeiro h3 { font-size: 1rem; }
+        .card-financeiro span { font-size: 0.72rem; }
 
-        .card-financeiro h3 { font-size: 1.1rem; }
+        /* Botões filtro rápido em linha compacta */
+        .btn-filtro-rapido {
+            font-size: 0.78rem !important;
+            padding: 6px 10px !important;
+            box-shadow: 2px 2px 0px #000 !important;
+        }
+
+        /* Botão Ver Gráficos menor */
+        #btnGrafico {
+            font-size: 1rem !important;
+            padding: 12px 20px !important;
+            width: 100% !important;
+            justify-content: center !important;
+        }
 
         /* Abas menores no mobile */
         .nav-link {
-            font-size: 0.8rem !important;
-            padding: 8px 12px !important;
+            font-size: 0.78rem !important;
+            padding: 7px 10px !important;
             border-radius: 10px 10px 0 0 !important;
         }
 
         /* Filtros em coluna única */
-        .filtro-container .col-md-4 {
-            width: 100% !important;
-        }
+        .filtro-container { padding: 14px !important; }
+        .filtro-container .col-md-4 { width: 100% !important; }
 
         .btn-buscar {
             width: 100%;
             padding: 12px;
             font-size: 1rem;
+            margin-top: 4px;
         }
 
         .btn-voltar-linha a {
@@ -84,13 +100,13 @@
         }
 
         /* Tabelas responsivas */
-        .table-acessivel {
-            font-size: 0.78rem !important;
-        }
+        .table-responsive { overflow-x: auto; }
+        .table-acessivel { font-size: 0.75rem !important; }
         .table-acessivel thead th,
-        .table-acessivel tbody td {
-            padding: 6px 4px !important;
-        }
+        .table-acessivel tbody td { padding: 5px 3px !important; }
+
+        /* Seção gráfico */
+        #secao-grafico { padding: 14px !important; margin-top: 30px !important; }
     }
 </style>
 
@@ -185,7 +201,7 @@
 <div class="tab-content scroll-relatorio mt-0" id="relatorioTabContent">
     <div class="tab-pane fade show active p-3 bg-white border border-dark border-top-0 rounded-bottom" id="prod">
         {% if producoes %}
-        <table class="table table-acessivel table-hover">
+        <div class="table-responsive"><table class="table table-acessivel table-hover">
             <thead>
                 <tr>
                     <th>Data</th>
@@ -210,7 +226,7 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table></div>
         {% else %}
         <p class="text-center py-5 fw-bold text-muted">Nenhuma produção no período.</p>
         {% endif %}
@@ -218,7 +234,7 @@
 
     <div class="tab-pane fade p-3 bg-white border border-dark border-top-0 rounded-bottom" id="vendas">
         {% if vendas %}
-        <table class="table table-acessivel table-hover">
+        <div class="table-responsive"><table class="table table-acessivel table-hover">
             <thead>
                 <tr>
                     <th>Data</th>
@@ -241,7 +257,7 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table></div>
         {% else %}
         <p class="text-center py-5 fw-bold text-muted">Nenhuma venda no período.</p>
         {% endif %}
@@ -249,7 +265,7 @@
 
     <div class="tab-pane fade p-3 bg-white border border-dark border-top-0 rounded-bottom" id="despesas-rel">
         {% if despesas %}
-        <table class="table table-acessivel table-hover">
+        <div class="table-responsive"><table class="table table-acessivel table-hover">
             <thead>
                 <tr>
                     <th>Data</th>
@@ -266,7 +282,7 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table></div>
         {% else %}
         <p class="text-center py-5 fw-bold text-muted">Nenhuma despesa no período.</p>
         {% endif %}
